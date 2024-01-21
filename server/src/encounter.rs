@@ -277,14 +277,16 @@ impl Encounter {
             "
 SELECT
 creature_id,
+url,
 name,
 level,
 alignment,
 monster_type,
 size,
+aquatic,
 is_caster,
 is_ranged
-FROM monsters
+FROM monsters_new
 WHERE level = ",
         );
 
@@ -337,13 +339,15 @@ WHERE level = ",
         let mut monster_data = sqlx::query_with(sql, arguments)
             .map(|row: PgRow| MonsterData {
                 creature_id: row.get(0),
-                name: row.get(1),
-                level: row.get(2),
-                alignment: row.get(3),
-                monster_type: row.get(4),
-                size: row.get(5),
-                is_caster: row.get(6),
-                is_ranged: row.get(7),
+                url: row.get(1),
+                name: row.get(2),
+                level: row.get(3),
+                alignment: row.get(4),
+                monster_type: row.get(5),
+                size: row.get(6),
+                is_caster: row.get(7),
+                is_ranged: row.get(8),
+                aquatic: row.get(9),
             })
             .fetch_all(pool)
             .await?;

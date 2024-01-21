@@ -7,12 +7,15 @@ import { json } from '@sveltejs/kit';
 		difficulty: null,
 		monster_types: null,
 		bbeg_budget: null,
+		bbeg_aquatic: null,
 		bbeg_caster: null,
 		bbeg_ranged: null,
 		hench_budget: null,
+		hench_aquatic: null,
 		hench_caster: null,
 		hench_ranged: null,
 		lackey_budget: null,
+		lackey_aquatic: null,
 		lackey_caster: null,
 		lackey_ranged: null,
 	};
@@ -25,12 +28,15 @@ import { json } from '@sveltejs/kit';
 			party_size: formData.party_size,
 			difficulty: formData.difficulty,
 			monster_types: [formData.monster_types],
+			bbeg_url: formData.bbeg_url,
 			bbeg_budget: formData.bbeg_budget,
 			bbeg_caster: formData.bbeg_caster.toLowerCase(),
 			bbeg_ranged: formData.bbeg_ranged.toLowerCase(),
+			hench_url: formData.bbeg_url,
 			hench_budget: formData.hench_budget,
 			hench_caster: formData.hench_caster.toLowerCase(),
 			hench_ranged: formData.hench_ranged.toLowerCase(),
+			lackey_url: formData.lackey_url,
 			lackey_budget: formData.lackey_budget,
 			lackey_caster: formData.lackey_caster.toLowerCase(),
 			lackey_ranged: formData.lackey_ranged.toLowerCase(),
@@ -131,21 +137,27 @@ import { json } from '@sveltejs/kit';
 
 <div style="float:right">
 {#if monster !== undefined}
-	<h2>Big Bad Evil Guy</h2>
+	<a rel="external" href={monster.bbeg_url}>
+		<h2>Big Bad Evil Guy</h2>
+	</a>
 	<h3>XP cost: {monster.bbeg_budget}</h3>
 	<p>name: {monster.bbeg_name}</p>
 	<p>number: {monster.bbeg_number}</p>
 	<p>level: {monster.bbeg_level}</p>
 	<p>alignment: {monster.bbeg_alignment}</p>
 	<p>type: {monster.bbeg_monster_type}</p>
-	<h2>Henchmen</h2>
+	<a rel="external" href={monster.hench_url}>
+		<h2>Henchmen</h2>
+	</a>
 	<h3>XP cost: {monster.hench_budget}</h3>
 	<p>name: {monster.hench_name}</p>
 	<p>number: {monster.hench_number}</p>
 	<p>level: {monster.hench_level}</p>
 	<p>alignment: {monster.hench_alignment}</p>
 	<p>type: {monster.hench_monster_type}</p>
-	<h2>Lackeys</h2>
+	<a rel="external" href={monster.lackey_url}>
+		<h2>Lackeys</h2>
+	</a>
 	<h3>XP cost: {monster.lackey_budget}</h3>
 	<p>name: {monster.lackey_name}</p>
 	<p>number: {monster.lackey_number}</p>
