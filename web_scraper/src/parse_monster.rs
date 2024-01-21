@@ -55,7 +55,7 @@ pub mod monster {
             //  trait       | character varying(50) |           |          | 
 
             if self.name.len() > 100 || self.name.is_empty() {return false}
-            if self.level > 20 {return false}
+            if self.level > 25 {return false}
             if self.alignment.len() > 10 || self.name.is_empty() {return false}
             if self.monster_type.len() > 100 || self.monster_type.is_empty() {return false}
             if self.size.len() > 20 || self.size.is_empty() {return false}
