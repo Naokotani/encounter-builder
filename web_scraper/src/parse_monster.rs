@@ -3,6 +3,7 @@ pub mod monster {
     use scraper::{Html, Selector};
 
     pub struct Monster {
+        pub url: String,
         pub name: String,
         pub level: i32,
         pub alignment: String,
@@ -11,15 +12,17 @@ pub mod monster {
         pub traits: Vec<String>,
         pub is_caster: bool,
         pub is_ranged: bool,
+        pub is_aquatic: bool,
     }
 
     impl Monster {
         pub fn new(document: &Html, monster_url: &str) -> Monster {
             println!("Gettting data for {}", monster_url);
-            let title = Title::new(document);
+            let title = Title::new(document, monster_url);
             let traits = Traits::new(document);
 
             Monster {
+                url: title.url.trim().to_string(),
                 name: title.name.trim().to_string(),
                 level: title.level,
                 alignment: traits.alignment.trim().to_string(),
@@ -28,6 +31,7 @@ pub mod monster {
                 traits: traits.traits,
                 is_caster: is_type(document, "Spells"),
                 is_ranged: is_type(document, "Ranged"),
+                is_aquatic: traits.aquatic,
             }
         }
 
@@ -49,7 +53,6 @@ pub mod monster {
             // -------------+-----------------------+-----------+----------+
             //  creature_id | integer               |           |          | 
             //  trait       | character varying(50) |           |          | 
-
 
             if self.name.len() > 100 || self.name.is_empty() {return false}
             if self.level > 20 {return false}
@@ -76,7 +79,8 @@ alignment: {}
 size: {}
 traits: {:?}
 Caster? {}
-Ranged? {}\n",
+Ranged? {}
+Aquatic? {}\n",
                 self.name,
                 self.level,
                 self.monster_type,
@@ -84,7 +88,8 @@ Ranged? {}\n",
                 self.size,
                 self.traits,
                 self.is_caster,
-                self.is_ranged
+                self.is_ranged,
+                self.is_aquatic,
             )
         }
     }
@@ -93,6 +98,7 @@ Ranged? {}\n",
         alignment: String,
         monster_type: String,
         size: String,
+        aquatic: bool,
         traits: Vec<String>,
     }
 
@@ -206,32 +212,48 @@ Ranged? {}\n",
                 type_string
             };
 
+           let mut aquatic = false;
+           let mut new_traits: Vec<String> = Vec::new();
+
+            for t in traits {
+                match t.as_str() {
+                    "Amphibious" => aquatic = true,
+                    "Aquatic" => aquatic = true,
+                    _ => new_traits.push(t),
+                }
+            };
+
+            traits = new_traits;
+
             Traits {
                 alignment,
                 monster_type,
                 size,
+                aquatic,
                 traits,
             }
         }
     }
 
     struct Title {
+        url: String,
         name: String,
         level: i32,
     }
 
     impl Title {
-        pub fn new(document: &Html) -> Title {
+        pub fn new(document: &Html, url: &str) -> Title {
             let name_selector = Selector::parse(r#"h4[class="monster"]"#).unwrap();
             let mut html = document.select(&name_selector).map(|x| x.inner_html());
             let title_string = html.next();
             if let Some(s) = title_string {
-                parse_title(s)
+                parse_title(s, url)
             } else {
                 let name_selector = Selector::parse("h4").unwrap();
                 let html = document.select(&name_selector).map(|x| x.inner_html());
 
                 let mut title = Title {
+                    url: String::from(url),
                     name: String::from("Parse Failed"),
                     level: 0,
                 };
@@ -239,7 +261,7 @@ Ranged? {}\n",
                 for tag in html {
                     if tag.contains("level") {
                         println!("{}", tag);
-                        title = parse_title(tag);
+                        title = parse_title(tag, url);
                     }
                 }
                 title
@@ -247,10 +269,11 @@ Ranged? {}\n",
         }
     }
 
-    fn parse_title(title: String) -> Title {
+    fn parse_title(title: String, url: &str) -> Title {
         let title_split = title.split_once('<');
         match title_split {
             Option::Some(s) => Title {
+                url: String::from(url),
                 name: s.0.to_string(),
                 level: get_digit(s.1, s.0),
             },
@@ -272,10 +295,14 @@ Ranged? {}\n",
     fn get_digit(string: &str, name: &str) -> i32 {
         let chars = string.chars();
         let mut num_string = String::new();
+        let mut previous_char = 'a';
         for char in chars {
-            if char.is_ascii_digit() {
+            if char.is_ascii_digit() && previous_char == '-' {
+                num_string.push_str("-1");
+            } else if char.is_ascii_digit() {
                 num_string.push_str(&char.to_string())
             }
+            previous_char = char;
         }
 
         match num_string.parse::<i32>() {
@@ -308,6 +335,7 @@ aaaaaaaaaaaa
         //This test should pass
         let traits = vec![String::from("Fast"), String::from("Slow"), String::from("speedy")];
         let monster = monster::Monster {
+            url: String::from("www.foo.com"),
             name: String::from("ghost"),
             level: 19,
             alignment: String::from("CE"),
@@ -316,12 +344,14 @@ aaaaaaaaaaaa
             traits,
             is_caster: false,
             is_ranged: false,
+            is_aquatic: false,
         };
 
         assert![monster.validate()];
         //Test long name over 100 characters
         let traits = vec![String::from("Fast"), String::from("Slow"), String::from("speedy")];
         let monster = monster::Monster {
+            url: String::from("www.foo.com"),
             name: long_string.clone(),
             level: 19,
             alignment: String::from("CE"),
@@ -330,6 +360,7 @@ aaaaaaaaaaaa
             traits,
             is_caster: false,
             is_ranged: false,
+            is_aquatic: false,
         };
 
         assert![!monster.validate()];
@@ -337,6 +368,7 @@ aaaaaaaaaaaa
         //Test level over 20
         let traits = vec![String::from("Fast"), String::from("Slow"), String::from("speedy")];
         let monster = monster::Monster {
+            url: String::from("www.foo.com"),
             name: String::from("ghost"),
             level: 21,
             alignment: String::from("CE"),
@@ -345,6 +377,7 @@ aaaaaaaaaaaa
             traits,
             is_caster: false,
             is_ranged: false,
+            is_aquatic: false,
         };
 
         assert![!monster.validate()];
@@ -352,6 +385,7 @@ aaaaaaaaaaaa
         let alignment = String::from("123");
         let traits = vec![String::from("Fast"), String::from("Slow"), String::from("speedy")];
         let monster = monster::Monster {
+            url: String::from("www.foo.com"),
             name: String::from("ghost"),
             level: 19,
             alignment,
@@ -360,6 +394,7 @@ aaaaaaaaaaaa
             traits,
             is_caster: false,
             is_ranged: false,
+            is_aquatic: false,
         };
 
         assert![!monster.validate()];
@@ -367,6 +402,7 @@ aaaaaaaaaaaa
         //Test monster type over 100
         let traits = vec![String::from("Fast"), String::from("Slow"), String::from("speedy")];
         let monster = monster::Monster {
+            url: String::from("www.foo.com"),
             name: String::from("ghost"),
             level: 19,
             alignment: String::from("CE"),
@@ -375,6 +411,7 @@ aaaaaaaaaaaa
             traits,
             is_caster: false,
             is_ranged: false,
+            is_aquatic: false,
         };
 
         assert![!monster.validate()];
@@ -383,6 +420,7 @@ aaaaaaaaaaaa
         let size = String::from("1234567890123456789012312");
         let traits = vec![String::from("Fast"), String::from("Slow"), String::from("speedy")];
         let monster = monster::Monster {
+            url: String::from("www.foo.com"),
             name: String::from("ghost"),
             level: 19,
             alignment: long_string.clone(),
@@ -391,6 +429,7 @@ aaaaaaaaaaaa
             traits,
             is_caster: false,
             is_ranged: false,
+            is_aquatic: false,
         };
 
         assert![!monster.validate()];
@@ -398,6 +437,7 @@ aaaaaaaaaaaa
         //Test for long traits
         let traits = vec![long_string.clone(), String::from("Slow"), String::from("speedy")];
         let monster = monster::Monster {
+            url: String::from("www.foo.com"),
             name: String::from("ghost"),
             level: 19,
             alignment: String::from("CE"),
@@ -406,6 +446,7 @@ aaaaaaaaaaaa
             traits,
             is_caster: false,
             is_ranged: false,
+            is_aquatic: false,
         };
 
         assert![!monster.validate()];

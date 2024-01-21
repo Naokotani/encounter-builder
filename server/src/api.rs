@@ -31,12 +31,6 @@ async fn get_monster(query_params: web::Query<QueryParams>) -> impl Responder {
     MonsterJson::new(query_params).await
 }
 
-// Add this to json
-// budget: i32,
-// bbeg_budget: 0.0,
-// hench_budget: 0.0,
-// lackey_budget: 0.0,
-
 #[derive(Serialize)]
 struct MonsterJson {
     budget: f32,
@@ -71,7 +65,6 @@ struct MonsterJson {
     lackey_is_ranged: bool,
     is_lackey: bool,
 }
-
 
 impl Responder for MonsterJson {
     type Body = BoxBody;

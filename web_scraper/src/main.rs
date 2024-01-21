@@ -75,21 +75,25 @@ async fn send_db(monster: monster::Monster) -> Result<(), sqlx::Error> {
 
     let id = sqlx::query!(
         r#"
-INSERT INTO monsters (
+INSERT INTO monsters_new (
+"url",
 "name",
 "level",
 "monster_type",
 "alignment",
 "size",
+"aquatic",
 "is_caster",
 "is_ranged")
-VALUES($1, $2, $3, $4, $5, $6, $7)
+VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING creature_id;"#,
+        monster.url,
         monster.name,
         monster.level,
         monster.monster_type,
         monster.alignment,
         monster.size,
+        monster.is_aquatic,
         monster.is_caster,
         monster.is_ranged,
     )
@@ -101,7 +105,7 @@ RETURNING creature_id;"#,
     for t in monster.traits {
         sqlx::query!(
             r#"
-INSERT INTO traits ("creature_id", "trait") VALUES ($1, $2);
+INSERT INTO traits_new ("creature_id", "trait") VALUES ($1, $2);
 "#,
             id.creature_id,
             t
