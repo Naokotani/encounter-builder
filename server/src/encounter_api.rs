@@ -8,8 +8,13 @@ use actix_web::{
 use serde::Serialize;
 use serde::Deserialize;
 
+
+#[get("/encounter")]
+async fn get_encounter(query_params: web::Query<QueryParams>) -> impl Responder {
+    EncounterJson::new(query_params).await
+}
+
 #[derive(Deserialize, Debug)]
-#[allow(dead_code)]
 struct QueryParams {
     level: i32,
     party_size: i32,
@@ -26,13 +31,8 @@ struct QueryParams {
     lackey_ranged: String,
 }
 
-#[get("/monsters")]
-async fn get_monster(query_params: web::Query<QueryParams>) -> impl Responder {
-    MonsterJson::new(query_params).await
-}
-
 #[derive(Serialize)]
-struct MonsterJson {
+struct EncounterJson {
     budget: f32,
 
     bbeg_budget: f32,
@@ -72,7 +72,7 @@ struct MonsterJson {
     is_lackey: bool,
 }
 
-impl Responder for MonsterJson {
+impl Responder for EncounterJson {
     type Body = BoxBody;
 
     fn respond_to(self, _req: &HttpRequest) -> HttpResponse<Self::Body> {
@@ -84,7 +84,7 @@ impl Responder for MonsterJson {
     }
 }
 
-impl MonsterJson {
+impl EncounterJson {
     async fn new(query_params: web::Query<QueryParams>) -> Self {
         let data = get_data(query_params).await;
         let (mut monsters, encounter) = data.unwrap();
@@ -155,7 +155,7 @@ impl MonsterJson {
             }
         };
 
-        MonsterJson {
+        EncounterJson {
             budget: encounter.budget,
 
             bbeg_budget: encounter.bbeg_budget,

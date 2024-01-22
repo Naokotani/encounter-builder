@@ -94,30 +94,6 @@ struct MonsterGroup {
     is_caster: EitherBool,
 }
 
-// impl fmt::Display for EncounterQuery {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         write!(
-//             f,
-//             "\
-// Henchmen:
-// number: {}
-// is ranged: {:?}
-// is caster: {:?}
-
-// Lackeys:
-// number: {}
-// is ranged: {:?}
-// is caster: {:?}\n",
-//             self.henchman.number,
-//             self.henchman.is_ranged,
-//             self.henchman.is_caster,
-//             self.lackey.number,
-//             self.lackey.is_ranged,
-//             self.lackey.is_caster,
-//         )
-//     }
-// }
-
 impl Encounter {
     pub async fn create(&mut self) -> Result<Vec<monster::Monster>, Box<dyn std::error::Error>> {
         let pool = PgPoolOptions::new()
@@ -266,7 +242,6 @@ impl Encounter {
         Ok(monster_list)
     }
 
-    #[allow(dead_code)]
     async fn query(
         &self,
         params: &MonsterGroup,

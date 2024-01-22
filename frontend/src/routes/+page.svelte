@@ -43,7 +43,7 @@ import { json } from '@sveltejs/kit';
 		});
 
 		console.log(params.toString());
-		const response = await fetch(`/apimonsters?${params.toString()}`);
+		const response = await fetch(`/encounter?${params.toString()}`);
 		monster = await response.json(monster);
 		console.log(monster);
 	}

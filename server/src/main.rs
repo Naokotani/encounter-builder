@@ -2,7 +2,8 @@ use actix_web::{post, web, App, HttpResponse, HttpServer, Responder, middleware}
 use dotenv::dotenv;
 mod monster;
 mod encounter;
-mod api;
+mod encounter_api;
+mod monster_api;
 mod error;
 
 
@@ -24,7 +25,8 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
             .wrap(middleware::Logger::default()) // Optional: Use built-in request logger
-            .service(api::get_monster)
+            .service(encounter_api::get_encounter)
+            .service(monster_api::get_monster)
             .service(echo)
             .route("/hey", web::get().to(manual_hello))
     })

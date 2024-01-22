@@ -8,7 +8,7 @@ export default defineConfig({
       // string shorthand: http://localhost:5173/foo -> http://localhost:4567/foo
       '/foo': 'http://:8081/',
       // with options: http://localhost:5173/api/bar-> http://jsonplaceholder.typicode.com/bar
-      '/api': {
+      '/encounter': {
         target: 'http://127.0.0.1:8081/',
         changeOrigin: false,
         rewrite: (path) => path.replace(/^\/api/, ''),

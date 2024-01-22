@@ -36,23 +36,20 @@ pub mod monster {
         }
 
         pub fn validate(&self) -> bool {
-            //                                            Table "public.monsters"
-            //     Column    |          Type          | Collation | Nullable | 
+            // Database table layout
+            //                  Table "public.monsters_new"
+            //     Column    |          Type          | Collation | Nullable |
             // --------------+------------------------+-----------+----------+
-            // creature_id  | integer                |           | not null 
-            // level        | integer                |           |           
-            // alignment    | character varying(10)  |           |           
-            // monster_type | character varying(100) |           |           
-            // size         | character varying(20)  |           |           
-            // is_caster    | boolean                |           |           
-            // is_ranged    | boolean                |           |           
-            // name         | character varying(100) |           |          
-
-            //                         Table "public.traits"
-            //    Column    |         Type          | Collation | Nullable | 
-            // -------------+-----------------------+-----------+----------+
-            //  creature_id | integer               |           |          | 
-            //  trait       | character varying(50) |           |          | 
+            //  creature_id  | integer                |           | not null |
+            //  url          | character varying(100) |           |          |
+            //  name         | character varying(100) |           |          |
+            //  level        | integer                |           |          |
+            //  alignment    | character varying(15)  |           |          |
+            //  monster_type | character varying(100) |           |          |
+            //  size         | character varying(15)  |           |          |
+            //  is_caster    | boolean                |           |          |
+            //  is_ranged    | boolean                |           |          |
+            //  aquatic      | boolean                |           |          |
 
             if self.name.len() > 100 || self.name.is_empty() {return false}
             if self.level > 25 {return false}

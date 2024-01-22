@@ -60,7 +60,7 @@ impl Monster {
     }
 
     #[allow(dead_code)]
-    pub async fn fetch_id(id: i32) -> Result<Monster, Box<dyn std::error::Error>> {
+    pub async fn fetch_one(id: i32) -> Result<Monster, Box<dyn std::error::Error>> {
         let pool = PgPoolOptions::new()
             .max_connections(5)
             .connect(&std::env::var("DATABASE_URL").expect("Env var didn't load"))
