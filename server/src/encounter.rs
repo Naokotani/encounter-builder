@@ -1,5 +1,5 @@
 use crate::monster;
-use crate::monster::MonsterData;
+use crate::query;
 use rand::Rng;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::postgres::PgRow;
@@ -9,6 +9,7 @@ use sqlx::Postgres;
 use sqlx::QueryBuilder;
 use sqlx::Row;
 use serde::Deserialize;
+
 
 pub struct Encounter {
     pub level: i32,
@@ -88,10 +89,10 @@ pub enum FillStatus {
 }
 
 #[derive(Debug)]
-struct MonsterGroup {
-    number: i32,
-    is_ranged: EitherBool,
-    is_caster: EitherBool,
+pub struct MonsterGroup {
+    pub number: i32,
+    pub is_ranged: EitherBool,
+    pub is_caster: EitherBool,
 }
 
 impl Encounter {
@@ -114,7 +115,7 @@ impl Encounter {
         let mut monster_list: Vec<monster::Monster> = Vec::new();
         let mut bbeg_params = self.get_bbeg_params();
         if self.bbeg_status != FillStatus::Skipped {
-            let result = self.query(&bbeg_params, self.bbeg_level.unwrap(), &pool).await;
+            let result = query::query(&self.monster_types, &bbeg_params, self.bbeg_level.unwrap(), &pool).await;
             match result {
                 Ok(m) => {
                     if let Some(m) = m {
@@ -137,7 +138,7 @@ impl Encounter {
                 self.bbeg_level.unwrap()
             );
             bbeg_params =  self.get_bbeg_params();
-            if let Some(m) = self.query(&bbeg_params, self.bbeg_level.unwrap(), &pool).await? {
+            if let Some(m) = query::query(&self.monster_types, &bbeg_params, self.bbeg_level.unwrap(), &pool).await? {
                 self.bbeg_budget();
                 println!("BBEG filled successfully");
                 monster_list.push(m);
@@ -155,9 +156,9 @@ impl Encounter {
 
         let mut hench_params = self.get_hench_params();
         if hench_params.number > 0 && self.hench_status != FillStatus::Skipped {
-            let result = self
-                .query(&hench_params, self.hench_level.unwrap(), &pool)
-                .await;
+            let result = query::query(
+                &self.monster_types, &hench_params, self.hench_level.unwrap(), &pool
+            ).await;
             match result {
                 Ok(m) => {
                     if let Some(m) = m {
@@ -183,7 +184,9 @@ impl Encounter {
             );
             self.hench_budget = 0.0;
             hench_params = self.get_hench_params();
-            if let Some(m) = self.query(&hench_params, self.hench_level.unwrap(), &pool).await? {
+            if let Some(m) = query::query(
+                &self.monster_types, &hench_params, self.hench_level.unwrap(), &pool
+            ).await? {
                 println!("Henchman filled successfully");
                 monster_list.push(m);
                 self.hench_status = FillStatus::Filled;
@@ -202,9 +205,10 @@ impl Encounter {
 
         let mut lackey_params = self.get_lackey_params();
         if lackey_params.number > 0 && self.lackey_status != FillStatus::Skipped {
-            let result = self
-                .query(&lackey_params, self.lackey_level.unwrap(), &pool)
-                .await;
+            let result = query::query(
+            &self.monster_types, &lackey_params, self.lackey_level.unwrap(), &pool
+            ).await;
+
             match result {
                 Ok(m) => {
                     if let Some(m) = m {
@@ -226,7 +230,7 @@ impl Encounter {
                 self.lackey_level.unwrap()
             );
             lackey_params = self.get_lackey_params();
-            if let Some(m) = self.query(&lackey_params, self.lackey_level.unwrap(), &pool).await? {
+            if let Some(m) = query::query(&self.monster_types, &lackey_params, self.lackey_level.unwrap(), &pool).await? {
                 println!("Lackey filled successfully");
                 monster_list.push(m);
                 self.lackey_status = FillStatus::Filled;
@@ -242,102 +246,6 @@ impl Encounter {
         Ok(monster_list)
     }
 
-    async fn query(
-        &self,
-        params: &MonsterGroup,
-        level: i32,
-        pool: &PgPool,
-    ) -> Result<Option<monster::Monster>, Box<dyn std::error::Error>> {
-        let mut builder: QueryBuilder<Postgres> = QueryBuilder::new(
-            "
-SELECT
-creature_id,
-url,
-name,
-level,
-alignment,
-monster_type,
-size,
-aquatic,
-is_caster,
-is_ranged
-FROM monsters_new
-WHERE level = ",
-        );
-
-        builder.push_bind(level);
-
-        match params.is_caster {
-            EitherBool::True => {
-                builder.push("\nAND is_caster = TRUE");
-            }
-
-            EitherBool::False => {
-                builder.push("\nAND is_caster = NOT TRUE");
-            }
-            _ => (),
-        };
-
-        match params.is_ranged {
-            EitherBool::True => {
-                builder.push("\nAND is_ranged = TRUE");
-            }
-
-            EitherBool::False => {
-                builder.push("\nAND is_ranged = NOT TRUE");
-            }
-            _ => (),
-        };
-
-        let mut added_type = false;
-        for t in &self.monster_types {
-            if !added_type {
-                builder.push("\nAND (monster_type = ");
-                builder.push_bind(t);
-            } else {
-                builder.push("\nOR monster_type = ");
-                builder.push_bind(t);
-            }
-            added_type = true
-        }
-
-        if added_type {
-            builder.push(")");
-        }
-
-        builder.push(";");
-
-        let mut query = builder.build();
-        let arguments = query.take_arguments().unwrap();
-        let sql = query.sql();
-
-        let mut monster_data = sqlx::query_with(sql, arguments)
-            .map(|row: PgRow| MonsterData {
-                creature_id: row.get(0),
-                url: row.get(1),
-                name: row.get(2),
-                level: row.get(3),
-                alignment: row.get(4),
-                monster_type: row.get(5),
-                size: row.get(6),
-                is_caster: row.get(7),
-                is_ranged: row.get(8),
-                aquatic: row.get(9),
-            })
-            .fetch_all(pool)
-            .await?;
-
-        let monster_traits = vec![String::from("Undead")];
-
-        if monster_data.is_empty() {
-            return Ok(None);
-        }
-        let mut rng = rand::thread_rng();
-        let random_monster = monster_data.remove(rng.gen_range(0..monster_data.len()));
-
-        let monster = monster::Monster::new(random_monster, monster_traits, params.number).unwrap();
-        Ok(Some(monster))
-    }
 
     fn adjust_budget(&self) -> Option<f32> {
         match self.party_size {

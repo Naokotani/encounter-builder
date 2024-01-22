@@ -5,6 +5,7 @@ mod encounter;
 mod encounter_api;
 mod monster_api;
 mod error;
+mod query;
 
 
 #[post("/echo")]
