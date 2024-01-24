@@ -19,6 +19,7 @@ onMount(() => {
 </script>
 
 <div role="radiogroup" >
+	<label for={type + options[0].value}>{type}</label>
   {#each options as {value, label}}
     <input
       class="sr-only"

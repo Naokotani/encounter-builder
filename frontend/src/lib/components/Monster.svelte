@@ -18,3 +18,21 @@
 	<li>alignment: {alignment}</li>
 	<li>type: {type}</li>
 </ul>
+
+<style>
+	h2 {
+		font-size: var(--h3);
+		margin: 0;
+		border-bottom: var(--line);
+	}
+
+	h3 {
+		margin: 0;
+		font-size: var(--h4);
+	}
+
+	a {
+		text-decoration: none;
+		color: var(--anchorColor);
+	}
+</style>

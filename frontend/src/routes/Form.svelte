@@ -70,27 +70,41 @@
 	}
 </script>
 
-<form on:submit|preventDefault={submit} style="width=50%; float: left;">
-	<h2>Encounter</h2>
+<form on:submit|preventDefault={submit} style="width=30%;">
+	<h2>Encounter Options</h2>
+	<div>
 	<Select label="Party Level" options={levels} bind:value={formData.level}/>
-	<Select
-		label="Party Size"
-		options={partySize}
-		selected={3}
-		bind:value={formData.party_size}/>
-	
 	<Select
 		label="Monster Types"
 		options={monsterTypes}
 		selected={0}
 		bind:value={formData.monster_types}/>
+	</div>
+	<div>
+	<Select
+		label="Party Size"
+		options={partySize}
+		selected={3}
+		bind:value={formData.party_size}/>
 	<Select
 		label="Encounter Difficulty"
 		options={encounterDifficulty}
 		selected={2}
 		bind:value={formData.difficulty}/>
-
-	<h2>Big Bad Evil Guy</h2>
+	<br/>
+		
+	</div>
+	<h2>Monsters Options</h2>
+	<p class="instructions">
+		Pick the budget you want to assign to each monster type.
+		Setting a monster budget to 'all' will disable the monsters
+		below it. 'None' will remove that monster group from the
+		results. 'More', 'Half' and 'less' represents the amount of
+		remaining budget that will be used on that monster group.
+	</p>
+	<button type="submit">Roll the dice</button>
+	<h3>Big Bad Evil Guy</h3>
+	<p class="instructions">Solo monster up to 4 levels about the party depending on budget.</p>
 	<Select
 		label="Solo Monster Budget"
 		options={monsterBudget}
@@ -98,14 +112,19 @@
 	<br/>
 	<Radio
 		options={eitherBools}
-		type="lackey"
+		type="Ranged?"
 		bind:userSelected={formData.bbeg.ranged}/>
 	<Radio
 		options={eitherBools}
-		type="lackey"
+		type="Caster?"
 		bind:userSelected={formData.bbeg.caster}/>
+<label>
+	Aquatic?
+	<input type="checkbox" bind:checked={formData.bbeg.aquatic} />
+</label>
 
-	<h2>Henchmen</h2>
+	<h3>Henchmen</h3>
+	<p class="instructions">Group of monsters between party level and -2 party level.</p>
 	<Select
 		label="Henchmen Budget"
 		bind:disabled={disabled}
@@ -114,17 +133,22 @@
 	<br/>
 	<Radio
 		options={eitherBools}
-		type="lackey"
+		type="Ranged?"
 		bind:disabled={disabled}
 		bind:userSelected={formData.hench.ranged}/>
 
 	<Radio
 		options={eitherBools}
-		type="lackey"
+		type="Caster?"
 		bind:disabled={disabled}
 		bind:userSelected={formData.hench.caster}/>
+	<label>
+		Aquatic?
+		<input type="checkbox" bind:checked={formData.hench.aquatic} />
+	</label>
 
-	<h2>Lackeys</h2>
+	<h3>Lackeys</h3>
+	<p class="instructions">Group of weaker monsters that are party level -3 or -4.</p>
 	<Select
 		label="Lackey Budget"
 		bind:disabled={disabledLackey}
@@ -133,14 +157,23 @@
 	<Radio
 		options={eitherBools}
 		bind:disabled={disabledLackey}
-		type="lackey"
+		type="Ranged?"
 		bind:userSelected={formData.lackey.ranged}/>
 	<Radio
 		options={eitherBools}
 		bind:disabled={disabledLackey}
-		type="lackey"
+		type="Caster?"
 		bind:userSelected={formData.lackey.caster}/>
+	<label>
+		Aquatic?
+		<input type="checkbox" bind:checked={formData.lackey.aquatic} />
+	</label>
 
 	<br/>
-	<button type="submit">Roll the dice</button>
 </form>
+
+<style>
+	.instructions {
+		max-width: 30rem;
+	}
+</style>

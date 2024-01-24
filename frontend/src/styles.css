@@ -21,6 +21,7 @@
   --lineColor: var(--purple);
   --headerText: var(--beige);
   --cardBg: var(--darkBeige);
+	--anchorColor: var(--darkGrey);
 
   /*Styles*/
   --line: solid 2px var(--lineColor);
@@ -85,79 +86,6 @@ h5 {font-size: var(--h5);}
 
 small, .text_small {font-size: var(--smallText);}
 
-.layout {
-  padding: 1rem var(--containerPadding);
-  min-height: calc(100vh - var(--footerHeight));
-}
-
-header nav {
-  background: var(--darkGreen);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  height: var(--headerHeight);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 10;
-  -webkit-transition: all 500ms ease;
-  -moz-transition: all 500ms ease;
-  -o-transition: all 500ms ease;
-  transition: all 500ms ease;
-  box-shadow: var(--level-3);
-  padding: 0 var(--containerPadding) 0 var(--containerPadding); 
-  box-sizing: border-box;
-}
-
-header nav a {
-  color: var(--headerText);
-  text-decoration: none;
-  font-size: var(--h5);
-}
-
-header nav h1 {
-  color: var(--headerText);
-  font-size: var(--h3);
-  margin: 0;
-}
-
-header nav li {
-	display: inline;
-}
-
-
-header nav li + li {
-	margin-left: 1rem;
-}
-
-table {
-  border-collapse: collapse;
-  margin-bottom: 1rem;
-  border: var(--line);
-  box-shadow: var(--level-3);
-}
-td,
-th {
-  padding: 10px 20px;
-}
-
-tr.header {
-	background: var(--darkGreen);
-	color: var(--lightGreen);
-}
-
-tr.green {
-	background: var(--lightGreen); 
-}
-
-tr.beige {
-	background: var(--darkBeige);
-}
-
-
-
 button {
   --buttonColor: var(--yellow);
   appearance: none;
@@ -182,35 +110,6 @@ button[disabled] {
   margin: 2px;
 }
 
-.splash-image img {
-	width: 100%
-}
-
-.splash-image {
-	margin-top: var(--headerHeight);
-	width: 100%;
-	height: calc(100vh - var(--headerHeight));
-	overflow: hidden;
-}
-
-.splash-quote-one {
-	font-family: var(--quoteFont);
-	position: absolute;
-	top: 275px;
-	left: 4%;
-	z-index: 5;
-	font-size: var(--h1);
-}
-
-.splash-quote-two {
-	font-family: var(--quoteFont);
-	position: absolute;
-	top: 350px;
-	right: 5%;
-	z-index: 5;
-	width: 300px;
-}
-
 button.cancel {
   --buttonColor: var(--danger);
   --textColor: var(--white);
@@ -222,25 +121,6 @@ button.small {
 
 aside img {
 	max-width: 100%;
-}
-
-img.banner {
-	width: 100%;
-	border-radius: 5px;
-	margin: 2rem 0 2rem 0;
-}
-
-.unit-form div {
-	margin-bottom: 0.5rem;
-}
-
-.unit-form {
-	height: auto;
-}
-
-.unit-form input {
-	background: var(--lightGreen);
-	border-radius: 3px;
 }
 
 .grid {
@@ -276,15 +156,3 @@ img.banner {
     --gridCols: 4;
 }
 
-.card p, h3, h4, h5 {
-	margin-top: 0;
-	margin-bottom: 0;
-}
-
-.card {
-  background: var(--cardBg);
-  color: var(--cardText);
-  padding: 2rem;
-  border-radius: 3px;
-  border: var(--line);
-}
