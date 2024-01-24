@@ -1,0 +1,3 @@
+#+title: Pathfinder Encounter Generator
+
+A Rust  and Svelte  web application that uses a rust API and a svelte front-end. The web application is designed to dynamically create encounters for a popular table top roll playing game called Pathfinder 2e. Using an HTML form on the front-end, users are able to configure their search constraints and then fetch sends a query to the Rust API. The rust back-end calculates the encounter budget and other query parameters which is then used to query a PostgreSQL database and send it as JSON back to the client. Additionally, to get the dataset, I built a web scraper in Rust to obtain and build the SQL database from an open source document.
