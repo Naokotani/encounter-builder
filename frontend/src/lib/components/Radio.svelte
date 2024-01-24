@@ -4,17 +4,17 @@
   export let userSelected = 'either';
 	export let type;
 	export let disabled = false;
+
 onMount(() => {
   const inputs = document.querySelectorAll("input");
-  const hasChecked = Array.from(inputs).some((input) => input.checked);
-  if (!hasChecked) {
-    inputs[0].checked = true;
-		for (let i in inputs) {
-			if (i % 3 === 0) {
-				inputs[i].checked = true;
-			}
+	const ins = (Array.from(inputs));
+  inputs[0].checked = true;
+	for (let i in inputs) {
+		if (i % 3 === 0) {
+			inputs[i].checked = true;
 		}
-  }
+	}
+	userSelected = 'either'
 })
 </script>
 
