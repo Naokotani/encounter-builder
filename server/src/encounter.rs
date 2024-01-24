@@ -2,15 +2,10 @@ use crate::monster;
 use crate::query;
 use rand::Rng;
 use sqlx::postgres::PgPoolOptions;
-use sqlx::postgres::PgRow;
-use sqlx::Execute;
-use sqlx::PgPool;
-use sqlx::Postgres;
-use sqlx::QueryBuilder;
-use sqlx::Row;
 use serde::Deserialize;
 
 
+#[derive(Debug)]
 pub struct Encounter {
     pub level: i32,
     pub party_size: i32,
@@ -47,6 +42,7 @@ pub enum EncounterBudget {
     Extreme,
 }
 
+#[derive(Debug)]
 #[derive(PartialEq)]
 #[allow(dead_code)]
 pub enum ConfigWeight {
@@ -74,6 +70,7 @@ impl Clone for EitherBool {
     }
 }
 
+#[derive(Debug)]
 pub struct Configuration {
     pub bbeg: ConfigWeight,
     pub henchman: ConfigWeight,
@@ -332,7 +329,7 @@ impl Encounter {
                 self.lackey_budget = self.budget;
                 self.lackey_budget()
             } else {
-                self.hench_status = FillStatus::Skipped;
+                self.lackey_status = FillStatus::Skipped;
                 (0, 0)
             };
 

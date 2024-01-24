@@ -88,6 +88,8 @@ impl EncounterJson {
     async fn new(query_params: web::Query<QueryParams>) -> Self {
         let data = get_data(query_params).await;
         let (mut monsters, encounter) = data.unwrap();
+        println!("{:?}", encounter);
+        println!("{:?}", monsters);
         let is_bbeg;
         let is_hench;
         let is_lackey;
@@ -253,11 +255,11 @@ async fn get_data(query_params: web::Query<QueryParams>
     };
 
     let monsters = encounter.create().await?;
-
+    println!("{:?}", monsters);
     Ok((monsters, encounter))
 }
 
-fn parse_either_bool(bool_str: &str) -> Result<encounter::EitherBool, Box<dyn std::error::Error>> {
+pub fn parse_either_bool(bool_str: &str) -> Result<encounter::EitherBool, Box<dyn std::error::Error>> {
     let either_bool = match bool_str {
         "either" => encounter::EitherBool::Either,
         "true" => encounter::EitherBool::True,

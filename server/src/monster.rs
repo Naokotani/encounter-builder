@@ -15,6 +15,7 @@ pub struct MonsterData {
     pub is_ranged: Option<bool>,
 }
 
+#[derive(Debug)]
 pub struct Monster {
     pub creature_id: i32,
     pub url: String,
