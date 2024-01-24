@@ -25,10 +25,30 @@
 		{value: 'false', label: 'No'},
 	];
 	let monsterTypes = [
+		{value: 'Animal', label: 'Animal'},
 		{value: 'Undead', label: 'Undead'},
-		{value: 'Humanoid', label: 'humanoid'},
+		{value: 'Humanoid', label: 'Humanoid'},
+		{value: 'Aberration', label: 'Aberration'},
 		{value: 'Outsider', label: 'Outsider'},
+		{value: 'Elemental', label: 'Elemental'},
+		{value: 'Beast', label: 'Beast'},
+		{value: 'Construct', label: 'Construct'},
+		{value: 'Dragon', label: 'Dragon'},
+		{value: 'Fiend', label: 'Fiend'},
+		{value: 'Plant', label: 'Plant'},
+		{value: 'Monitor', label: 'Monitor'},
+		{value: 'Ooze', label: 'Ooze'},
+		{value: 'Celestial', label: 'Celestial'},
+		{value: 'Giant', label: 'Giant'},
+		{value: 'Human', label: 'Human'},
+		{value: 'Demon', label: 'Demon'},
+		{value: 'Div', label: 'Div'},
+		{value: 'Daemon', label: 'Daemon'},
+		{value: 'Dream', label: 'Dream'},
+		{value: 'Protean', label: 'Protean'},
+		{value: 'Devil', label: 'Devil'},
 	];
+
 
 	let levels = []
 	for (let i = 1; i < 21; i++) {
