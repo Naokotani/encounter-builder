@@ -44,7 +44,7 @@ impl MonsterJson {
     async fn new(query_params: web::Query<QueryParams>) -> MonsterJson {
         let pool = PgPoolOptions::new()
             .max_connections(5)
-            .connect(&std::env::var("DATABASE_URL").expect("Env var didn't load"))
+            .connect(&std::env::var("DATABASE_URL").expect("Database connection falure."))
             .await
             .unwrap();
 
@@ -110,12 +110,12 @@ impl MonsterJson {
         } else {
             MonsterJson {
                 budget: 10,
-                url: String::from("foo"),
-                name: String::from("foo"),
+                url: String::from(""),
+                name: String::from("Failed To find Monster"),
                 number: 0,
                 level: 0,
-                alignment: String::from("foo"),
-                monster_type: String::from("foo"),
+                alignment: String::from(""),
+                monster_type: String::from(""),
                 aquatic: false,
                 is_caster: false,
                 is_ranged: false,

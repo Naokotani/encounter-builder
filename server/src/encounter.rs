@@ -188,7 +188,10 @@ impl Encounter {
         }
 
         let mut hench_attempts = 0;
-        while self.hench_status == FillStatus::Failed && hench_attempts < 3 {
+        while self.hench_status == FillStatus::Failed
+            && hench_attempts < 3
+            && self.hench_status != FillStatus::Skipped
+        {
             println!(
                 "Henchman failed for level {}, attempting to fill.",
                 self.hench_level.unwrap()
@@ -402,9 +405,18 @@ impl Encounter {
 
     fn henchman_budget(&mut self) -> i32 {
         let hench_mod: i32;
-        if self.hench_level.is_none() {
-            let mut rng = rand::thread_rng();
+        let mut rng = rand::thread_rng();
+        if self.hench_level.is_none() && self.hench_budget >= 40.0 {
             hench_mod = rng.gen_range(-2..=0);
+        } else if self.hench_level.is_none() && self.hench_budget >= 30.0 {
+            hench_mod = rng.gen_range(-1..=0);
+        } else if self.hench_level.is_none() && self.level > 1 && self.hench_budget >= 20.0 {
+            hench_mod = -2;
+        } else if self.hench_level.is_none() {
+            self.hench_status = FillStatus::Skipped;
+            self.configuration.lackey = ConfigWeight::All;
+            self.budget += self.hench_budget;
+            return 0;
         } else if self.hench_level.unwrap() == self.level {
             hench_mod = -1;
             self.hench_level = Some(self.level - 1);

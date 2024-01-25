@@ -43,7 +43,6 @@
 	let hench_budget_constant;
 	let lackey_budget_constant;
 
-
 	async function handleSubmit() {
 		const params = new URLSearchParams({
 			level: formData.level,
