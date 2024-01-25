@@ -50,7 +50,7 @@ impl MonsterJson {
 
         let is_ranged = query_params.is_ranged.as_str();
         let is_caster = query_params.is_caster.as_str();
-        let level = query_params.level - query_params.party_level;
+        let level_mod = query_params.level - query_params.party_level;
         let party_level = query_params.party_level;
         let budget = query_params.budget;
 
@@ -61,15 +61,18 @@ impl MonsterJson {
         };
 
         let monster_budget = if query_params.bbeg {
+            println!("Bbeg: {}", query_params.bbeg);
             MonsterBudget {
-                level,
+                level: query_params.level,
                 budget,
                 number: 1,
             }
-        } else if level == -3 ||  level == -4 {
-          lackey_budget(party_level, level, budget)
+        } else if level_mod == -3 ||  level_mod == -4 {
+          lackey_budget(party_level, level_mod, budget)
+        } else if level_mod <= 0 || level_mod >= -2 {
+          henchman_budget(party_level, level_mod, budget)
         } else {
-          henchman_budget(party_level, level, budget)
+            panic!("Unable to get budget for: {}", query_params.number)
         };
 
         println!("{}", query_params.number);

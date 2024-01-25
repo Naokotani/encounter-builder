@@ -1,9 +1,8 @@
 use crate::monster;
 use crate::query;
 use rand::Rng;
-use sqlx::postgres::PgPoolOptions;
 use serde::Deserialize;
-
+use sqlx::postgres::PgPoolOptions;
 
 #[derive(Debug)]
 pub struct Encounter {
@@ -31,7 +30,6 @@ pub struct Encounter {
     pub lackey_ranged: EitherBool,
 }
 
-
 #[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 pub enum EncounterBudget {
@@ -42,8 +40,7 @@ pub enum EncounterBudget {
     Extreme,
 }
 
-#[derive(Debug)]
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 #[allow(dead_code)]
 pub enum ConfigWeight {
     Less,
@@ -100,11 +97,11 @@ impl Encounter {
             .await?;
 
         self.budget = match self.difficulty {
-            EncounterBudget::Trivial => 40.0 + self.adjust_budget().unwrap(),
-            EncounterBudget::Low => 60.0 + self.adjust_budget().unwrap(),
-            EncounterBudget::Moderate => 80.0 + self.adjust_budget().unwrap(),
-            EncounterBudget::Severe => 120.0 + self.adjust_budget().unwrap(),
-            EncounterBudget::Extreme => 160.0 + self.adjust_budget().unwrap(),
+            EncounterBudget::Trivial => 40.0 + self.adjust_budget(),
+            EncounterBudget::Low => 60.0 + self.adjust_budget(),
+            EncounterBudget::Moderate => 80.0 + self.adjust_budget(),
+            EncounterBudget::Severe => 120.0 + self.adjust_budget(),
+            EncounterBudget::Extreme => 160.0 + self.adjust_budget(),
         };
 
         println!("\nStarting budget: {}", self.budget);
@@ -112,7 +109,13 @@ impl Encounter {
         let mut monster_list: Vec<monster::Monster> = Vec::new();
         let mut bbeg_params = self.get_bbeg_params();
         if self.bbeg_status != FillStatus::Skipped {
-            let result = query::query(&self.monster_types, &bbeg_params, self.bbeg_level.unwrap(), &pool).await;
+            let result = query::query(
+                &self.monster_types,
+                &bbeg_params,
+                self.bbeg_level.unwrap(),
+                &pool,
+            )
+            .await;
             match result {
                 Ok(m) => {
                     if let Some(m) = m {
@@ -134,8 +137,15 @@ impl Encounter {
                 "BBEG failed for level {}, attempting to fill.",
                 self.bbeg_level.unwrap()
             );
-            bbeg_params =  self.get_bbeg_params();
-            if let Some(m) = query::query(&self.monster_types, &bbeg_params, self.bbeg_level.unwrap(), &pool).await? {
+            bbeg_params = self.get_bbeg_params();
+            if let Some(m) = query::query(
+                &self.monster_types,
+                &bbeg_params,
+                self.bbeg_level.unwrap(),
+                &pool,
+            )
+            .await?
+            {
                 self.bbeg_budget();
                 println!("BBEG filled successfully");
                 monster_list.push(m);
@@ -143,10 +153,10 @@ impl Encounter {
             } else if bbeg_attempts == 3 {
             };
             bbeg_attempts += 1;
-        };
+        }
 
         self.budget -= self.bbeg_budget;
-        
+
         println!("\nBBEG monster group: {:?}", bbeg_params);
         println!("BBEG budget {}", self.bbeg_budget);
         println!("Remaining budget {}\n", self.budget);
@@ -154,8 +164,12 @@ impl Encounter {
         let mut hench_params = self.get_hench_params();
         if hench_params.number > 0 && self.hench_status != FillStatus::Skipped {
             let result = query::query(
-                &self.monster_types, &hench_params, self.hench_level.unwrap(), &pool
-            ).await;
+                &self.monster_types,
+                &hench_params,
+                self.hench_level.unwrap(),
+                &pool,
+            )
+            .await;
             match result {
                 Ok(m) => {
                     if let Some(m) = m {
@@ -182,8 +196,13 @@ impl Encounter {
             self.hench_budget = 0.0;
             hench_params = self.get_hench_params();
             if let Some(m) = query::query(
-                &self.monster_types, &hench_params, self.hench_level.unwrap(), &pool
-            ).await? {
+                &self.monster_types,
+                &hench_params,
+                self.hench_level.unwrap(),
+                &pool,
+            )
+            .await?
+            {
                 println!("Henchman filled successfully");
                 monster_list.push(m);
                 self.hench_status = FillStatus::Filled;
@@ -192,7 +211,7 @@ impl Encounter {
                 self.lackey_budget += self.hench_budget;
             };
             hench_attempts += 1;
-        };
+        }
 
         self.budget -= self.hench_budget;
 
@@ -203,8 +222,12 @@ impl Encounter {
         let mut lackey_params = self.get_lackey_params();
         if lackey_params.number > 0 && self.lackey_status != FillStatus::Skipped {
             let result = query::query(
-            &self.monster_types, &lackey_params, self.lackey_level.unwrap(), &pool
-            ).await;
+                &self.monster_types,
+                &lackey_params,
+                self.lackey_level.unwrap(),
+                &pool,
+            )
+            .await;
 
             match result {
                 Ok(m) => {
@@ -227,7 +250,14 @@ impl Encounter {
                 self.lackey_level.unwrap()
             );
             lackey_params = self.get_lackey_params();
-            if let Some(m) = query::query(&self.monster_types, &lackey_params, self.lackey_level.unwrap(), &pool).await? {
+            if let Some(m) = query::query(
+                &self.monster_types,
+                &lackey_params,
+                self.lackey_level.unwrap(),
+                &pool,
+            )
+            .await?
+            {
                 println!("Lackey filled successfully");
                 monster_list.push(m);
                 self.lackey_status = FillStatus::Filled;
@@ -243,19 +273,18 @@ impl Encounter {
         Ok(monster_list)
     }
 
-
-    fn adjust_budget(&self) -> Option<f32> {
+    fn adjust_budget(&self) -> f32 {
         match self.party_size {
-            1 => Some(-20.0),
-            2 => Some(-15.0),
-            3 => Some(-10.0),
-            4 => Some(0.0),
-            5 => Some(10.0),
-            6 => Some(15.0),
-            7 => Some(20.0),
-            8 => Some(30.0),
-            9 => Some(40.0),
-            _ => None,
+            1 => -20.0,
+            2 => -15.0,
+            3 => -10.0,
+            4 => 0.0,
+            5 => 10.0,
+            6 => 15.0,
+            7 => 20.0,
+            8 => 30.0,
+            9 => 40.0,
+            _ => panic!("Party size out of range {}", self.party_size),
         }
     }
 
@@ -293,7 +322,7 @@ impl Encounter {
 
     fn get_hench_params(&mut self) -> MonsterGroup {
         let current_budget = self.budget;
-        let henchman_number= match self.configuration.henchman {
+        let henchman_number = match self.configuration.henchman {
             ConfigWeight::Less => {
                 self.hench_budget = current_budget * 0.25;
                 self.henchman_budget()
@@ -315,7 +344,7 @@ impl Encounter {
                 0
             }
         };
-        
+
         MonsterGroup {
             number: henchman_number,
             is_ranged: self.hench_ranged.clone(),
@@ -341,21 +370,20 @@ impl Encounter {
         }
     }
 
-
     fn lackey_budget(&mut self) -> (i32, i32) {
         let lackey_mod: i32;
         if self.level == 2 {
-            lackey_mod = - 3;
-            self.lackey_level = Some(self.level -3);
+            lackey_mod = -3;
+            self.lackey_level = Some(self.level - 3);
         } else if self.lackey_level.is_none() {
             let mut rng = rand::thread_rng();
             lackey_mod = rng.gen_range(-4..=-3);
         } else if self.lackey_level.unwrap() == self.level - 4 {
             lackey_mod = -3;
-            self.lackey_level = Some(self.level -3);
+            self.lackey_level = Some(self.level - 3);
         } else {
             lackey_mod = -4;
-            self.lackey_level = Some(self.level -4);
+            self.lackey_level = Some(self.level - 4);
         }
 
         let budget = self.lackey_budget;
@@ -378,15 +406,15 @@ impl Encounter {
             let mut rng = rand::thread_rng();
             hench_mod = rng.gen_range(-2..=0);
         } else if self.hench_level.unwrap() == self.level {
-            hench_mod = - 1;
-            self.hench_level = Some(self.level -1);
-        } else if self.hench_level.unwrap() == self.level -1 {
+            hench_mod = -1;
+            self.hench_level = Some(self.level - 1);
+        } else if self.hench_level.unwrap() == self.level - 1 {
             self.hench_level = Some(self.level - 2);
-            hench_mod = - 2;
+            hench_mod = -2;
         } else {
             self.hench_level = Some(self.level);
             hench_mod = 0;
-        } 
+        }
 
         let budget = self.hench_budget;
         match hench_mod {
@@ -411,57 +439,82 @@ impl Encounter {
 
     fn bbeg_budget(&mut self) -> Option<i32> {
         if self.bbeg_level.is_none() {
-            if self.bbeg_budget >= 160.0 {
-                self.bbeg_budget = 160.0;
-                Some(self.level + 4)
-            } else if self.bbeg_budget >= 120.0 {
-                self.bbeg_budget = 120.0;
-                Some(self.level + 3)
-            } else if self.bbeg_budget >= 80.0 {
-                self.bbeg_budget = 80.0;
-                Some(self.level + 2)
-            } else if self.bbeg_budget >= 60.0 {
-                self.bbeg_budget = 60.0;
-                Some(self.level + 1)
-            } else if self.bbeg_budget >= 40.0 {
-                self.bbeg_budget = 40.0;
-                Some(self.level)
-            } else if self.bbeg_budget >= 30.0 {
-                self.bbeg_budget = 30.0;
-                Some(self.level - 1)
-            } else if self.bbeg_budget >= 20.0 {
-                self.bbeg_budget = 20.0;
-                Some(self.level - 2)
-            } else if self.bbeg_budget >= 15.0 {
-                self.bbeg_budget = 15.0;
-                Some(self.level - 3)
-            } else {
-                Some(self.level - 4)
+            match self.bbeg_budget {
+                b if b >= 160.0 => {
+                    self.bbeg_budget = 160.0;
+                    Some(self.level + 4)
+                }
+                b if b >= 120.0 => {
+                    self.bbeg_budget = 120.0;
+                    Some(self.level + 3)
+                }
+                b if b >= 80.0 => {
+                    self.bbeg_budget = 80.0;
+                    Some(self.level + 2)
+                }
+                b if b >= 60.0 => {
+                    self.bbeg_budget = 60.0;
+                    Some(self.level + 1)
+                }
+                b if b >= 40.0 => {
+                    self.bbeg_budget = 40.0;
+                    Some(self.level)
+                }
+                b if b >= 30.0 => {
+                    self.bbeg_budget = 30.0;
+                    Some(self.level - 1)
+                }
+                b if b >= 20.0 => {
+                    self.bbeg_budget = 20.0;
+                    Some(self.level - 2)
+                }
+                b if b >= 15.0 => {
+                    self.bbeg_budget = 15.0;
+                    Some(self.level - 3)
+                }
+                b if b >= 10.0 => {
+                    self.bbeg_budget = 10.0;
+                    Some(self.level - 4)
+                }
+                _ => None,
             }
-        } else if self.bbeg_budget == 160.0 {
-            self.bbeg_budget = 120.0;
-            Some(self.level + 3)
-        } else if self.bbeg_budget == 120.0 {
-            self.bbeg_budget = 80.0;
-            Some(self.level + 2)
-        } else if self.bbeg_budget == 80.0 {
-            self.bbeg_budget = 60.0;
-            Some(self.level + 1)
-        } else if self.bbeg_budget == 60.0 {
-            self.bbeg_budget = 40.0;
-            Some(self.level)
-        } else if self.bbeg_budget == 40.0 {
-            self.bbeg_budget = 30.0;
-            Some(self.level - 1)
-        } else if self.bbeg_budget == 30.0 {
-            self.bbeg_budget = 20.0;
-            Some(self.level - 2)
-        } else if self.bbeg_budget == 20.0 {
-            self.bbeg_budget = 15.0;
-            Some(self.level - 3)
         } else {
-            self.bbeg_budget = 10.0;
-            Some(self.level - 4)
+            let budget = self.bbeg_budget.round() as i32;
+            match budget {
+                160 => {
+                    self.bbeg_budget = 120.0;
+                    Some(self.level + 3)
+                }
+                120 => {
+                    self.bbeg_budget = 80.0;
+                    Some(self.level + 2)
+                }
+                80 => {
+                    self.bbeg_budget = 60.0;
+                    Some(self.level + 1)
+                }
+                60 => {
+                    self.bbeg_budget = 40.0;
+                    Some(self.level)
+                }
+                40 => {
+                    self.bbeg_budget = 30.0;
+                    Some(self.level - 1)
+                }
+                30 => {
+                    self.bbeg_budget = 20.0;
+                    Some(self.level - 2)
+                }
+                20 => {
+                    self.bbeg_budget = 15.0;
+                    Some(self.level - 3)
+                }
+                15 => {
+                    self.bbeg_budget = 10.0;
+                    Some(self.level - 4)
+                }
+                _ => None,
+            }
         }
     }
 }

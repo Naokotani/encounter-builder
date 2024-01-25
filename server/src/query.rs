@@ -9,7 +9,6 @@ use sqlx::Postgres;
 use sqlx::QueryBuilder;
 use sqlx::Row;
 
-
 pub async fn query(
     monster_types: &Vec<String>,
     params: &encounter::MonsterGroup,
