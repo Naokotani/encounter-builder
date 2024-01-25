@@ -1,4 +1,32 @@
+  /* Color scheme */
+    /* --purple: #724ea7; */
+    /* --purple: #a591ff; */
+    /* --blue: #5086e4; */
+    /* --yellow: #fff291; */
+    /* --pink: #ff76a8; */
+    /* --white: #fefefe; */
+    /* --black: #2b2b2b; */
+
+    /* define colors intentions */
+    /* --primary: var(--purple); */
+    /* --danger: var(--pink); */
+    /* --accent: var(--yellow); */
+    /* --shadow: var(--darkPurple); */
+    /* --background: var(--black); */
+    /* --textColor: var(--white); */
+    /* --headerColor: var(--white); */
+    /* --blockTextColor: var(--white); */
+    /* --lineColor: var(--purple); */
+    /* --buttonTextColor: var(--white); */
+    /* --strong: var(--purple); */
+
+
+    /* Styles */
+    /* --line: solid 1px var(--lineColor); */
+    /* --linkUnderline: solid 1px var(--yellow); */
+
 @import url('https://fonts.googleapis.com/css?family=Space+Mono:400|Mulish:400|UnifrakturMaguntia:400');
+
 :root {
   /*Color pallette*/
   --lightGreen: #DFE8AC;
@@ -6,22 +34,30 @@
   --darkGreen: #58612B;
   --beige: #D7E0A6;
   --darkBeige: #AEB586;
-  --yellow: #D0E665;
-  --purple: #6C1E9C;
+  --yellow: #fff291;
+  --purple: #300150;
 
+  --blue: aqua;
+  --white: #fefefe;
   --lightGrey: #bfbfbf;
   --grey: #404040;
-  --darkGrey: #141414;
-  --black: #121212;
+  --darkGrey: #2b2b2b;
+  --black: #141414;
 
   /*Color Intentions*/
 
-  --background: var(--green);
-  --textColor: var(--black);
+
+  --linkUnderline: var(--blue);
+  --background: var(--white);
+  --textColor: var(--darkGrey);
   --lineColor: var(--purple);
-  --headerText: var(--beige);
-  --cardBg: var(--darkBeige);
-	--anchorColor: var(--darkGrey);
+  --headerText: var(--black);
+  --cardBg: var(--lightGrey);
+  --cardText: var(--black);
+	--anchorColor: var(--grey);
+	--buttonColor: var(--darkGrey);
+	--buttonText: var(--white);
+	--buttonHover: var(--blue);
 
   /*Styles*/
   --line: solid 2px var(--lineColor);
@@ -87,21 +123,18 @@ h5 {font-size: var(--h5);}
 small, .text_small {font-size: var(--smallText);}
 
 button {
-  --buttonColor: var(--yellow);
   appearance: none;
-  color: var(--black);
+  color: var(--buttonText);
   background-color: var(--buttonColor);
   border: none;
   padding: 5px 25px;
   box-shadow: var(--level-2);
   transition: 0.3s ease-in-out box-shadow;
-  margin: 2px;
 }
 
 button:hover {
-  box-shadow:var(--level-3);
-  border: solid 2px var(--darkGreen);
-  margin: 0px;
+  box-shadow:var(--level-4);
+	color: var(--buttonHover);
 }
 
 button[disabled] {

@@ -8,26 +8,35 @@
 onMount(() => {
   const inputs = document.querySelectorAll("input");
 	const ins = (Array.from(inputs));
-  inputs[0].checked = true;
-	for (let i in inputs) {
-		if (i % 3 === 0) {
-			inputs[i].checked = true;
-		}
-	}
 	userSelected = 'either'
 })
 </script>
 
-<div role="radiogroup" >
+<div role="radiogroup" class="flex radio-group" >
 	<label for={type + options[0].value}>{type}</label>
   {#each options as {value, label}}
-    <input
-      class="sr-only"
-			disabled={disabled}
-      type="radio"
-      id={label + type}
-      bind:group={userSelected}
-      value={value} />
-    <label for={label}>{label}</label>
+		<div class="radio">
+				
+				<input
+					class="sr-only"
+					disabled={disabled}
+					type="radio"
+					id={label + type}
+					bind:group={userSelected}
+					value={value} />
+			<label for={label}>{label}</label>
+		</div>
   {/each}
 </div>
+
+<style>
+	.radio-group>label {
+		padding-left: 2rem;
+	}
+	.radio {
+		padding-right: 60%;
+	}
+	label {
+		text-align: left;
+	}
+</style>

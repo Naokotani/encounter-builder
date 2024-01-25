@@ -19,6 +19,7 @@
 		{value: 'severe', label: 'Severe'},
 		{value: 'extreme', label: 'Extreme'},
 	];
+
 	let eitherBools = [
 		{value: 'either', label: 'Either'},
 		{value: 'true', label: 'Yes'},
@@ -49,11 +50,11 @@
 		{value: 'Devil', label: 'Devil'},
 	];
 
-
 	let levels = []
 	for (let i = 1; i < 21; i++) {
 		levels.push({value: i.toString(), label: i.toString()});
 	}
+
 	let partySize = []
 	for (let i = 1; i < 10; i++) {
 		partySize.push({value: i.toString(), label: i.toString()});
@@ -102,7 +103,7 @@
 		results. 'More', 'Half' and 'less' represents the amount of
 		remaining budget that will be used on that monster group.
 	</p>
-	<button type="submit">Roll the dice</button>
+	<button class="submit" type="submit">Roll the dice</button>
 	<h3>Big Bad Evil Guy</h3>
 	<p class="instructions">Solo monster up to 4 levels about the party depending on budget.</p>
 	<Select
@@ -110,6 +111,8 @@
 		options={monsterBudget}
 		bind:value={formData.bbeg.budget}/>
 	<br/>
+	<div class="grid">
+		
 	<Radio
 		options={eitherBools}
 		type="Ranged?"
@@ -118,42 +121,50 @@
 		options={eitherBools}
 		type="Caster?"
 		bind:userSelected={formData.bbeg.caster}/>
+	</div>
 <label>
 	Aquatic?
 	<input type="checkbox" bind:checked={formData.bbeg.aquatic} />
 </label>
-
 	<h3>Henchmen</h3>
-	<p class="instructions">Group of monsters between party level and -2 party level.</p>
+	<p class="instructions">
+		Group of monsters between party level and party level -2.
+	</p>
 	<Select
 		label="Henchmen Budget"
 		bind:disabled={disabled}
 		options={monsterBudget}
 		bind:value={formData.hench.budget}/>
 	<br/>
-	<Radio
-		options={eitherBools}
-		type="Ranged?"
-		bind:disabled={disabled}
-		bind:userSelected={formData.hench.ranged}/>
+	<div class="grid">
+		<Radio
+			options={eitherBools}
+			type="Ranged?"
+			bind:disabled={disabled}
+			bind:userSelected={formData.hench.ranged}/>
 
-	<Radio
-		options={eitherBools}
-		type="Caster?"
-		bind:disabled={disabled}
-		bind:userSelected={formData.hench.caster}/>
+		<Radio
+			options={eitherBools}
+			type="Caster?"
+			bind:disabled={disabled}
+			bind:userSelected={formData.hench.caster}/>
+	</div>
 	<label>
 		Aquatic?
 		<input type="checkbox" bind:checked={formData.hench.aquatic} />
 	</label>
 
 	<h3>Lackeys</h3>
-	<p class="instructions">Group of weaker monsters that are party level -3 or -4.</p>
+	<p class="instructions">
+		Group of weaker monsters that are party level -3 or -4.
+		Party must be at least level 2. 
+	</p>
 	<Select
 		label="Lackey Budget"
 		bind:disabled={disabledLackey}
 		options={monsterBudget}
 		bind:value={formData.lackey.budget}/>
+	<div class="grid">
 	<Radio
 		options={eitherBools}
 		bind:disabled={disabledLackey}
@@ -164,6 +175,7 @@
 		bind:disabled={disabledLackey}
 		type="Caster?"
 		bind:userSelected={formData.lackey.caster}/>
+	</div>
 	<label>
 		Aquatic?
 		<input type="checkbox" bind:checked={formData.lackey.aquatic} />
@@ -175,5 +187,10 @@
 <style>
 	.instructions {
 		max-width: 30rem;
+	}
+
+	.submit {
+		font-size: var(--h5);
+		padding: 0.5rem 1rem;
 	}
 </style>

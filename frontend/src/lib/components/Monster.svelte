@@ -24,6 +24,21 @@
 		font-size: var(--h3);
 		margin: 0;
 		border-bottom: var(--line);
+		display: inline-block;
+	}
+
+	ul {
+		padding: 0;
+	}
+
+	li {
+		list-style: none;
+	}
+
+	h2:hover {
+		--lineColor: var(--linkUnderline);
+		border-bottom: solid 2px var(--lineColor);
+		color: var(--black);
 	}
 
 	h3 {
