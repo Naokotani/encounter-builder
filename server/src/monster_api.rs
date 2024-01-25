@@ -1,12 +1,8 @@
 use crate::encounter;
-use crate::encounter::EitherBool;
 use crate::encounter_api;
-use crate::error;
-use crate::monster;
 use crate::query;
 use actix_web::{
-    body::BoxBody, get, http::header::ContentType, web, HttpRequest, HttpResponse, Responder,
-    Result,
+    body::BoxBody, get, http::header::ContentType, web, HttpRequest, HttpResponse, Responder
 };
 use serde::Deserialize;
 use serde::Serialize;
@@ -53,8 +49,8 @@ impl MonsterJson {
             .unwrap();
 
         let is_ranged = query_params.is_ranged.as_str();
-        let is_caster = query_params.is_ranged.as_str();
-        let level = query_params.level;
+        let is_caster = query_params.is_caster.as_str();
+        let level = query_params.level - query_params.party_level;
         let party_level = query_params.party_level;
         let budget = query_params.budget;
 
@@ -70,7 +66,7 @@ impl MonsterJson {
                 budget,
                 number: 1,
             }
-        } else if party_level -3 == level || party_level -4 == level {
+        } else if level == -3 ||  level == -4 {
           lackey_budget(party_level, level, budget)
         } else {
           henchman_budget(party_level, level, budget)
@@ -146,13 +142,13 @@ struct MonsterBudget {
 }
 
 fn lackey_budget(party_level: i32, level: i32, budget: i32) -> MonsterBudget {
-    let lackey_mod = if party_level > 2 && party_level - 3 == level && budget >= 15 {
-        -4
-    } else {
-        -3
+    let lackey_mod = match level {
+        -3 if party_level > 3 && budget >= 15 => -4,
+        -4 => -3,
+        _ => panic!("Level mod out of range {}", level),
     };
-
     let mut budget = budget as f32;
+
 
     match lackey_mod {
         -4 => {
@@ -178,17 +174,16 @@ fn lackey_budget(party_level: i32, level: i32, budget: i32) -> MonsterBudget {
 }
 
 fn henchman_budget(party_level: i32, level: i32, budget: i32) -> MonsterBudget {
-    let mut budget = budget as f32;
-    let level_mod = level - party_level;
-
-    let hench_mod = match level_mod {
-        l if l == -2 && budget >= 30.0 => -1,
-        l if l == -1 && budget >= 40.0 => 0,
-        l if l == 0 && party_level > 1 => -2,
-        _ if budget >= 30.0 => -1,
+    let hench_mod = match level {
+        -2 if budget >= 30 => -1,
+        -1 if budget >= 40 => 0,
+         0 if party_level > 1 => -2,
+        _ if budget >= 30 => -1,
         -2 => -2,
         _ => panic!("ya dun goofed"),
     };
+
+    let mut budget = budget as f32;
 
     match hench_mod {
         -2 => {

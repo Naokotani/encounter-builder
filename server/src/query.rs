@@ -2,7 +2,6 @@ use crate::encounter;
 use crate::monster;
 use crate::encounter::EitherBool;
 use rand::Rng;
-use sqlx::postgres::PgPoolOptions;
 use sqlx::postgres::PgRow;
 use sqlx::Execute;
 use sqlx::PgPool;
