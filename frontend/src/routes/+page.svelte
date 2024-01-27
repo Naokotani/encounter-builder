@@ -167,18 +167,18 @@
 		lackey1 = lackey1;
 	}
 
-	function handleBbeg() {
-		bbeg1.newGroup();
+	async function handleBbeg() {
+		await bbeg1.newGroup();
 		bbeg1 = bbeg1;
 	}
 
-	function handleHench() {
-		hench1.newGroup();
+	async function handleHench() {
+		await hench1.newGroup();
 		hench1 = hench1;
 	}
 
-	function handleLackey() {
-		lackey1.newGroup();
+	async function handleLackey() {
+		await lackey1.newGroup();
 		lackey1 = lackey1;
 	}
 
