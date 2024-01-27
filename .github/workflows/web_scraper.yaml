@@ -13,16 +13,14 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: ./web_scraper
 
     steps:
     - uses: actions/checkout@v4
     - name: Build
       env: 
            super_secret: ${{ secrets.SuperSecret }}
+
+      run: cd ./web_scraper
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
