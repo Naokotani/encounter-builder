@@ -1,6 +1,77 @@
 <script>
+	import { writable } from 'svelte/store';
 	import { Monster } from '$lib';
 	import Form from './Form.svelte'
+
+	class Group {
+		constructor(bbeg) {
+			this.url = "";
+			this.level = 0;
+			this.name = "";
+			this.budget = 0;
+			this.number = 0;
+			this.alignment = "";
+			this.type = "";
+			this.budget_constant = 0;
+			this.aquatic = false;
+			this.is_caster = false;
+			this.is_ranged = false;
+			this.is_found = false;
+			this.bbeg = bbeg;
+		}
+
+		initialGroup(json, budget) {
+			this.updateGroupData(json)
+			this.budget_constant = budget;
+		}
+
+	async newGroup() {
+		console.log('foo');
+		const params = new URLSearchParams({
+			level: this.level,
+			party_level: formData.level,
+			number: this.number,
+			monster_types: formData.monster_types,
+			budget: this.budget_constant,
+			is_caster: formData.bbeg.caster.toLowerCase(),
+			is_ranged: formData.bbeg.ranged.toLowerCase(),
+			bbeg: this.bbeg,
+		});
+
+  try {
+    const response = await fetch(`/monster?${params.toString()}`);
+    const json = await response.json();
+		console.log(json);
+    if (json) {
+      this.updateGroupData(json);
+			this.found = true;
+    } else {
+      this.is_found = false;
+    }
+  } catch (error) {
+    console.error('Error fetching monster data:', error);
+    this.is_found = false;
+  }
+
+	}
+
+	updateGroupData(json) {
+		this.url = json.url;
+		this.level = json.level;
+		this.name = json.name;
+		this.budget = json.budget;
+		this.number = json.number;
+		this.alignment = json.alignment;
+		this.type = json.type;
+		this.aquatic = json.aquatic;
+		this.is_caster = json.is_caster;
+		this.is_ranged = json.is_ranged;
+	}
+}
+
+	let bbeg1 = new Group(true);
+	let hench1 = new Group(false);
+	let lackey1 = new Group(false);
 
 	let bbegData = {
 		budget: 'all',
@@ -36,13 +107,6 @@
 		lackey: lackeyData,
 	};
 
-	let monster;
-	let bbeg_number = 0;
-	let hench_number = 0;
-	let lackey_number = 0;
-	let hench_budget_constant;
-	let lackey_budget_constant;
-
 	async function handleSubmit() {
 		const params = new URLSearchParams({
 			level: formData.level,
@@ -64,128 +128,60 @@
 		});
 
 		const response = await fetch(`/encounter?${params.toString()}`);
-		monster = await response.json(monster);
-		bbeg_number = monster.bbeg_number;
-		hench_number = monster.hench_number;
-		lackey_number = monster.lackey_number;
+		const monster = await response.json();
 
-		bbeg.url = monster.bbeg_url;
-		bbeg.level = monster.bbeg_level;
-		bbeg.name = monster.bbeg_name;
-		bbeg.budget = monster.bbeg_budget;
-		bbeg.number = monster.bbeg_number;
-		bbeg.alignment = monster.bbeg_alignment;
-		bbeg.type = monster.bbeg_monster_type;
+		const bbegData = {
+			url: monster.bbeg_url,
+			level: monster.bbeg_level,
+			name: monster.bbeg_name,
+			budget: monster.bbeg_budget,
+			number: monster.bbeg_number,
+			alignment: monster.bbeg_alignment,
+			type: monster.bbeg_monster_type,
+		}
+		bbeg1.initialGroup(bbegData, monster.bbeg_budget);
+		bbeg1 = bbeg1;
 
-		hench.url = monster.hench_url;
-		hench.level = monster.hench_level;
-		hench.name = monster.hench_name;
-		hench.budget = monster.hench_budget;
-		hench.number = monster.hench_number;
-		hench.alignment = monster.hench_alignment;
-		hench.type = monster.hench_monster_type;
-		hench_budget_constant = monster.hench_budget;
+		const henchData = {
+			url: monster.hench_url,
+			level: monster.hench_level,
+			name: monster.hench_name,
+			budget: monster.hench_budget,
+			number: monster.hench_number,
+			alignment: monster.hench_alignment,
+			type: monster.hench_monster_type,
+		}
+		hench1.initialGroup(henchData, monster.hench_budget);
+		hench1 = hench1;
 
-		lackey.url = monster.lackey_url;
-		lackey.level = monster.lackey_level;
-		lackey.name = monster.lackey_name;
-		lackey.budget = monster.lackey_budget;
-		lackey.number = monster.lackey_number;
-		lackey.alignment = monster.lackey_alignment;
-		lackey.type = monster.lackey_monster_type;
-		lackey_budget_constant = monster.lackey_budget;
+		const lackeyData = {
+			url: monster.lackey_url,
+			level: monster.lackey_level,
+			name: monster.lackey_name,
+			budget: monster.lackey_budget,
+			number: monster.lackey_number,
+			alignment: monster.lackey_alignment,
+			type: monster.lackey_monster_type,
+		}
+		lackey1.initialGroup(lackeyData, monster.lackey_budget);
+		lackey1 = lackey1;
 	}
 
-	async function newBbeg() {
-		const params = new URLSearchParams({
-			level: bbeg.level,
-			party_level: formData.level,
-			number: bbeg.number,
-			monster_types: formData.monster_types,
-			budget: bbeg.budget,
-			is_caster: formData.bbeg.caster.toLowerCase(),
-			is_ranged: formData.bbeg.ranged.toLowerCase(),
-			bbeg: true,
-		});
-
-		const response = await fetch(`/monster?${params.toString()}`);
-		bbeg = await response.json();
+	function handleBbeg() {
+		bbeg1.newGroup();
+		bbeg1 = bbeg1;
 	}
 
-	async function newHench() {
-		const params = new URLSearchParams({
-			level: hench.level,
-			party_level: formData.level,
-			number: hench.number,
-			budget: hench_budget_constant,
-			monster_types: formData.monster_types,
-			is_caster: formData.hench.caster.toLowerCase(),
-			is_ranged: formData.hench.ranged.toLowerCase(),
-			bbeg: false,
-		});
-
-		const number = hench.number;
-		const response = await fetch(`/monster?${params.toString()}`);
-		hench = await response.json();
+	function handleHench() {
+		hench1.newGroup();
+		hench1 = hench1;
 	}
 
-	async function newLackey() {
-		const params = new URLSearchParams({
-			level: lackey.level,
-			party_level: formData.level,
-			number: lackey.number,
-			monster_types: formData.monster_types,
-			budget: lackey_budget_constant,
-			is_caster: formData.lackey.caster.toLowerCase(),
-			is_ranged: formData.lackey.ranged.toLowerCase(),
-			bbeg: false,
-		});
-
-		const res = await fetch(`/monster?${params.toString()}`);
-		lackey = await res.json();
+	function handleLackey() {
+		lackey1.newGroup();
+		lackey1 = lackey1;
 	}
 
-	let bbeg = {
-		alignment: "",
-		aquatic: false,
-		budget: 0,
-		is_caster: false,
-		is_found: false,
-		is_ranged: false,
-		level: 0,
-		monster_type: "",
-		name: "",
-		number: 0,
-		url: "",
-	}
-
-	let hench = {
-		alignment: "",
-		aquatic: false,
-		budget: 0,
-		is_caster: false,
-		is_found: false,
-		is_ranged: false,
-		level: 0,
-		monster_type: "",
-		name: "",
-		number: 0,
-		url: "",
-	}
-
-	let lackey = {
-		alignment: "",
-		aquatic: false,
-		budget: 0,
-		is_caster: false,
-		is_found: false,
-		is_ranged: false,
-		level: 0,
-		monster_type: "",
-		name: "",
-		number: 0,
-		url: "",
-	}
 
 </script>
 <div class="grid aside-left">
@@ -193,48 +189,48 @@
 		<Form formData={formData} submit={handleSubmit} />
 	</div>
 	<div class="cards">
-		{#if bbeg_number !== 0}
+		{#if bbeg1.number !== 0}
 			<div class="card">
 				<Monster
-					bind:url={bbeg.url}
-					bind:level={bbeg.level}
-					bind:name={bbeg.name}
-					bind:budget={bbeg.budget}
-					bind:number={bbeg.number}
-					bind:alignment={bbeg.alignment}
-					bind:type={bbeg.monster_type}
+					bind:url={bbeg1.url}
+					bind:level={bbeg1.level}
+					bind:name={bbeg1.name}
+					bind:budget={bbeg1.budget}
+					bind:number={bbeg1.number}
+					bind:alignment={bbeg1.alignment}
+					bind:type={bbeg1.type}
 					/>
-				<button on:click={newBbeg}>New Monster</button>
+				<button on:click={handleBbeg}>New Monster</button>
 			</div>
 		{/if}
 
-{#if hench_number !== 0}
+{#if hench1.number !== 0}
 	<div class="card">
 		<Monster
-			bind:url={hench.url}
-			bind:name={hench.name}
-			bind:level={hench.level}
-			bind:budget={hench.budget}
-			bind:number={hench.number}
-			bind:alignment={hench.alignment}
-			bind:type={hench.monster_type}
+			bind:url={hench1.url}
+			bind:name={hench1.name}
+			bind:level={hench1.level}
+			bind:budget={hench1.budget}
+			bind:number={hench1.number}
+			bind:alignment={hench1.alignment}
+			bind:type={hench1.type}
 			/>
-		<button on:click={newHench}>New Monster</button>
+		<button on:click={handleHench}>New Monster</button>
 	</div>
 {/if}
 
-{#if lackey_number !== 0}
+{#if lackey1.number !== 0}
 	<div class="card">
 		<Monster
-			bind:url={lackey.url}
-			bind:name={lackey.name}
-			bind:level={lackey.level}
-			bind:budget={lackey.budget}
-			bind:number={lackey.number}
-			bind:alignment={lackey.alignment}
-			bind:type={lackey.monster_type}
+			bind:url={lackey1.url}
+			bind:name={lackey1.name}
+			bind:level={lackey1.level}
+			bind:budget={lackey1.budget}
+			bind:number={lackey1.number}
+			bind:alignment={lackey1.alignment}
+			bind:type={lackey1.monster_type}
 			/>
-		<button on:click={newLackey}>New Monster</button>
+		<button on:click={handleLackey}>New Monster</button>
 	</div>
 {/if}
 	</div>
