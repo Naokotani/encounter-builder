@@ -63,7 +63,7 @@
 			lackey_ranged: formData.lackey.ranged.toLowerCase(),
 		});
 
-		const response = await fetch(`http://alembichead.com/encounter?${params.toString()}`);
+		const response = await fetch(`/encounter?${params.toString()}`);
 		monster = await response.json(monster);
 		bbeg_number = monster.bbeg_number;
 		hench_number = monster.hench_number;
@@ -108,7 +108,7 @@
 			bbeg: true,
 		});
 
-		const response = await fetch(`http://alembichead.com/monster?${params.toString()}`);
+		const response = await fetch(`/monster?${params.toString()}`);
 		bbeg = await response.json();
 	}
 
@@ -125,7 +125,7 @@
 		});
 
 		const number = hench.number;
-		const response = await fetch(`http://alembichead.com/monster?${params.toString()}`);
+		const response = await fetch(`/monster?${params.toString()}`);
 		hench = await response.json();
 	}
 
@@ -141,7 +141,7 @@
 			bbeg: false,
 		});
 
-		const res = await fetch(`http://alembichead.com/monster?${params.toString()}`);
+		const res = await fetch(`/monster?${params.toString()}`);
 		lackey = await res.json();
 	}
 

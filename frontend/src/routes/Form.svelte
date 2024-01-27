@@ -63,7 +63,9 @@
 	let disabled = true;
 	let disabledLackey = true;
 	$: disabled = formData.bbeg.budget === 'all';
-	$: disabledLackey = formData.hench.budget === 'all' || formData.bbeg.budget === 'all';
+	$: disabledLackey = formData.hench.budget === 'all'
+	|| formData.bbeg.budget === 'all'
+	|| formData.level === '1';
 	$: formData.hench.budget = formData.bbeg.budget === 'all'?'none':formData.hench.budget;
 	$: {
 		formData.lackey.budget = formData.bbeg.budget === 'all' || formData.hench.budget === 'all'?
