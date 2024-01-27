@@ -1,7 +1,7 @@
 <script>
-	import { writable } from 'svelte/store';
 	import { Monster } from '$lib';
 	import Form from './Form.svelte'
+	import { PUBLIC_MONSTER_API, PUBLIC_ENCOUNTER_API } from '$env/static/public';
 
 	class Group {
 		constructor(bbeg) {
@@ -39,7 +39,7 @@
 		});
 
   try {
-    const response = await fetch(`/monster?${params.toString()}`);
+    const response = await fetch(`${PUBLIC_MONSTER_API}${params.toString()}`);
     const json = await response.json();
 		console.log(json);
     if (json) {
@@ -127,7 +127,7 @@
 			lackey_ranged: formData.lackey.ranged.toLowerCase(),
 		});
 
-		const response = await fetch(`/encounter?${params.toString()}`);
+		const response = await fetch(`${PUBLIC_ENCOUNTER_API}${params.toString()}`);
 		const monster = await response.json();
 
 		const bbegData = {
