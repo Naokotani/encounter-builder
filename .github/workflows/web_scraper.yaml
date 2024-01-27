@@ -14,8 +14,9 @@ jobs:
 
     runs-on: ubuntu-latest
     defaults:
-      shell: bash
-      working-directory: ./web_scraper
+      run:
+        shell: bash
+        working-directory: ./web_scraper
 
     steps:
     - uses: actions/checkout@v3
