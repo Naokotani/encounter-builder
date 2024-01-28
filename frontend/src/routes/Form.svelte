@@ -12,6 +12,11 @@
 		{value: 'none', label: 'None'},
 	];
 
+	let lackeyBudget = [
+		{value: 'all', label: 'All'},
+		{value: 'none', label: 'None'},
+	];
+
 	let encounterDifficulty = [
 		{value: 'trivial', label: 'Trivial'},
 		{value: 'low', label: 'Low'},
@@ -25,6 +30,7 @@
 		{value: 'true', label: 'Yes'},
 		{value: 'false', label: 'No'},
 	];
+
 	let monsterTypes = [
 		{value: 'Animal', label: 'Animal'},
 		{value: 'Undead', label: 'Undead'},
@@ -164,7 +170,7 @@
 	<Select
 		label="Lackey Budget"
 		bind:disabled={disabledLackey}
-		options={monsterBudget}
+		options={lackeyBudget}
 		bind:value={formData.lackey.budget}/>
 	<div class="grid">
 	<Radio

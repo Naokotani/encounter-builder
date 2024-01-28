@@ -1,4 +1,3 @@
-use sqlx::postgres::PgPoolOptions;
 use std::fmt;
 
 #[derive(Debug)]
@@ -29,6 +28,7 @@ pub struct Monster {
     pub aquatic: bool,
     pub is_caster: bool,
     pub is_ranged: bool,
+    
 }
 
 impl Monster {
@@ -58,59 +58,6 @@ impl Monster {
             is_caster,
             is_ranged,
         })
-    }
-
-    #[allow(dead_code)]
-    pub async fn fetch_one(id: i32) -> Result<Monster, Box<dyn std::error::Error>> {
-        let pool = PgPoolOptions::new()
-            .max_connections(5)
-            .connect(&std::env::var("DATABASE_URL").expect("Env var didn't load"))
-            .await?;
-
-        let monster_data = sqlx::query_as!(
-            MonsterData,
-            "
-SELECT
- m.creature_id,
- m.url,
- m.name,
- m.level,
- m.alignment,
- m.monster_type,
- m.size,
- m.aquatic,
- m.is_caster,
- m.is_ranged
-FROM monsters_new m
-WHERE m.creature_id = $1;
-        ",
-            id
-        )
-        .fetch_one(&pool)
-        .await?;
-
-        let trait_records = sqlx::query!(
-            "
-SELECT trait
-FROM traits_new
-WHERE creature_id = $1;
-        ",
-            monster_data.creature_id.expect("foo")
-        )
-        .fetch_all(&pool)
-        .await?;
-
-        let mut monster_traits: Vec<String> = Vec::new();
-
-        for record in trait_records {
-            if let Some(s) = record.r#trait {
-                monster_traits.push(s)
-            }
-        }
-
-        let monster = Monster::new(monster_data, monster_traits, 1).unwrap();
-
-        Ok(monster)
     }
 }
 

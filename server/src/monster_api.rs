@@ -37,7 +37,7 @@ struct MonsterJson {
     aquatic: bool,
     is_caster: bool,
     is_ranged: bool,
-    is_found: bool,
+    status: String,
 }
 
 impl MonsterJson {
@@ -79,13 +79,14 @@ impl MonsterJson {
         println!("level: {}", query_params.level);
         println!("{}", query_params.budget);
 
+
         println!("{:?}", monster_budget);
         let monster_types: Vec<String> = query_params
             .monster_types
             .split(',')
             .map(|v| v.to_string())
             .collect();
-        let monster = query::query(&monster_types, &monster_group, monster_budget.level, &pool).await;
+        let monster = query::query(&monster_types, &monster_group,  monster_budget.level, &pool).await;
 
         let monster = match monster {
             Ok(m) => m,
@@ -105,7 +106,7 @@ impl MonsterJson {
                 aquatic: false,
                 is_caster: m.is_caster,
                 is_ranged: m.is_ranged,
-                is_found: true,
+                status: String::from("Filled"),
             }
         } else {
             MonsterJson {
@@ -119,7 +120,7 @@ impl MonsterJson {
                 aquatic: false,
                 is_caster: false,
                 is_ranged: false,
-                is_found: false,
+                status: String::from("Failed"),
             }
         }
     }

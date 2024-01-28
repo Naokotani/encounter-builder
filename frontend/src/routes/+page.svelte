@@ -1,5 +1,6 @@
 <script>
-	import { Monster, Group } from '$lib';
+	import { Monster,  } from '$lib';
+	import Group from './group'
 	import Form from './Form.svelte'
 	import { PUBLIC_ENCOUNTER_API } from '$env/static/public';
 
@@ -73,6 +74,7 @@
 			number: monster.bbeg_number,
 			alignment: monster.bbeg_alignment,
 			type: monster.bbeg_monster_type,
+			status: monster.bbeg_status,
 		}
 		bbeg1.initialGroup(bbegData, monster.bbeg_budget);
 		bbeg1 = bbeg1;
@@ -85,6 +87,7 @@
 			number: monster.hench_number,
 			alignment: monster.hench_alignment,
 			type: monster.hench_monster_type,
+			status: monster.hench_status,
 		}
 		hench1.initialGroup(henchData, monster.hench_budget);
 		hench1 = hench1;
@@ -97,23 +100,27 @@
 			number: monster.lackey_number,
 			alignment: monster.lackey_alignment,
 			type: monster.lackey_monster_type,
+			status: monster.lackey_status,
 		}
 		lackey1.initialGroup(lackeyData, monster.lackey_budget);
 		lackey1 = lackey1;
+		console.log(bbeg1.status)
+		console.log(hench1.status)
+		console.log(lackey1.status)
 	}
 
 	async function handleBbeg() {
-		await bbeg1.newGroup();
+		await bbeg1.newGroup(formData);
 		bbeg1 = bbeg1;
 	}
 
 	async function handleHench() {
-		await hench1.newGroup();
+		await hench1.newGroup(formData);
 		hench1 = hench1;
 	}
 
 	async function handleLackey() {
-		await lackey1.newGroup();
+		await lackey1.newGroup(formData);
 		lackey1 = lackey1;
 	}
 </script>
@@ -122,7 +129,7 @@
 		<Form formData={formData} submit={handleSubmit} />
 	</div>
 	<div class="cards">
-		{#if bbeg1.number !== 0 || bbeg1.name === "Failed To find Monster"}
+		{#if bbeg1.number !== 0 || bbeg1.status === 'Failed'}
 			<div class="card">
 				<Monster
 					bind:url={bbeg1.url}
@@ -137,7 +144,7 @@
 			</div>
 		{/if}
 
-{#if hench1.number !== 0 || hench1.name === "Failed To find Monster"}
+{#if hench1.number !== 0 || hench1.status === 'Failed'}
 	<div class="card">
 		<Monster
 			bind:url={hench1.url}
@@ -152,7 +159,7 @@
 	</div>
 {/if}
 
-{#if lackey1.number !== 0 || lackey1.name === "Failed To find Monster"}
+{#if lackey1.number !== 0 || lackey1.status === 'Failed'}
 	<div class="card">
 		<Monster
 			bind:url={lackey1.url}

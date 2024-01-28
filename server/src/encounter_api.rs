@@ -2,12 +2,11 @@ use crate::encounter;
 use crate::error;
 use crate::monster;
 use actix_web::{
-    body::BoxBody, get, http::header::ContentType, HttpRequest, HttpResponse, Responder,
-    Result, web,
+    body::BoxBody, get, http::header::ContentType, web, HttpRequest, HttpResponse, Responder,
+    Result,
 };
-use serde::Serialize;
 use serde::Deserialize;
-
+use serde::Serialize;
 
 #[get("/encounter")]
 async fn get_encounter(query_params: web::Query<QueryParams>) -> impl Responder {
@@ -46,6 +45,7 @@ struct EncounterJson {
     bbeg_is_caster: bool,
     bbeg_is_ranged: bool,
     is_bbeg: bool,
+    bbeg_status: String,
 
     hench_budget: f32,
     hench_url: String,
@@ -58,6 +58,7 @@ struct EncounterJson {
     hench_is_caster: bool,
     hench_is_ranged: bool,
     is_hench: bool,
+    hench_status: String,
 
     lackey_budget: f32,
     lackey_url: String,
@@ -70,6 +71,7 @@ struct EncounterJson {
     lackey_is_caster: bool,
     lackey_is_ranged: bool,
     is_lackey: bool,
+    lackey_status: String,
 }
 
 impl Responder for EncounterJson {
@@ -109,7 +111,7 @@ impl EncounterJson {
                 url: String::from("None"),
                 name: String::from("Failed To find Monster"),
                 number: 0,
-                level: 0,
+                level: encounter.lackey_level.unwrap_or(encounter.level - 3),
                 alignment: String::from("None"),
                 monster_type: String::from("None"),
                 size: String::from("None"),
@@ -130,7 +132,7 @@ impl EncounterJson {
                 url: String::from("None"),
                 name: String::from("Failed To find Monster"),
                 number: 0,
-                level: 0,
+                level: encounter.hench_level.unwrap_or(encounter.level),
                 alignment: String::from("None"),
                 monster_type: String::from("None"),
                 size: String::from("None"),
@@ -151,7 +153,7 @@ impl EncounterJson {
                 url: String::from("None"),
                 name: String::from("Failed To find Monster"),
                 number: 0,
-                level: 0,
+                level: encounter.bbeg_level.unwrap(),
                 alignment: String::from("None"),
                 monster_type: String::from("None"),
                 size: String::from("None"),
@@ -161,6 +163,10 @@ impl EncounterJson {
                 is_ranged: false,
             }
         };
+
+        let bbeg_status = parse_status(encounter.bbeg_status);
+        let hench_status = parse_status(encounter.hench_status);
+        let lackey_status = parse_status(encounter.lackey_status);
 
         EncounterJson {
             budget: encounter.budget,
@@ -176,6 +182,7 @@ impl EncounterJson {
             bbeg_is_caster: bbeg.is_caster,
             bbeg_is_ranged: bbeg.is_ranged,
             is_bbeg,
+            bbeg_status,
 
             hench_budget: encounter.hench_budget,
             hench_url: henchmen.url,
@@ -188,6 +195,7 @@ impl EncounterJson {
             hench_is_caster: henchmen.is_caster,
             hench_is_ranged: henchmen.is_ranged,
             is_hench,
+            hench_status,
 
             lackey_budget: encounter.lackey_budget,
             lackey_url: lackey.url,
@@ -200,23 +208,29 @@ impl EncounterJson {
             lackey_is_caster: lackey.is_caster,
             lackey_is_ranged: lackey.is_ranged,
             is_lackey,
+            lackey_status,
         }
     }
 }
 
-async fn get_data(query_params: web::Query<QueryParams> 
+async fn get_data(
+    query_params: web::Query<QueryParams>,
 ) -> Result<(Vec<monster::Monster>, encounter::Encounter), Box<dyn std::error::Error>> {
-
     let difficulty = match query_params.difficulty.as_str() {
         "trivial" => encounter::EncounterBudget::Trivial,
         "low" => encounter::EncounterBudget::Low,
         "moderate" => encounter::EncounterBudget::Moderate,
         "severe" => encounter::EncounterBudget::Severe,
         "extreme" => encounter::EncounterBudget::Extreme,
-        _ => return Err(Box::new(error::QueryError(String::from("Bad difficulty string")))),
+        _ => {
+            return Err(Box::new(error::QueryError(String::from(
+                "Bad difficulty string",
+            ))))
+        }
     };
 
-    let monster_types: Vec<String> = query_params.monster_types
+    let monster_types: Vec<String> = query_params
+        .monster_types
         .split(',')
         .map(|v| v.to_string())
         .collect();
@@ -263,14 +277,30 @@ async fn get_data(query_params: web::Query<QueryParams>
     Ok((monsters, encounter))
 }
 
-pub fn parse_either_bool(bool_str: &str) -> Result<encounter::EitherBool, Box<dyn std::error::Error>> {
+pub fn parse_either_bool(
+    bool_str: &str,
+) -> Result<encounter::EitherBool, Box<dyn std::error::Error>> {
     let either_bool = match bool_str {
         "either" => encounter::EitherBool::Either,
         "true" => encounter::EitherBool::True,
         "false" => encounter::EitherBool::False,
-        _ => return Err(Box::new(error::QueryError(format!("Bad bool string: {}", bool_str)))),
+        _ => {
+            return Err(Box::new(error::QueryError(format!(
+                "Bad bool string: {}",
+                bool_str
+            ))))
+        }
     };
     Ok(either_bool)
+}
+
+pub fn parse_status(status: encounter::FillStatus) -> String {
+    match status {
+        encounter::FillStatus::Filled => String::from("Filled"),
+        encounter::FillStatus::Pending => String::from("Pending"),
+        encounter::FillStatus::Failed => String::from("Failed"),
+        encounter::FillStatus::Skipped => String::from("Skipped"),
+    }
 }
 
 fn parse_budget(budget: &str) -> Result<encounter::ConfigWeight, Box<dyn std::error::Error>> {
@@ -280,7 +310,12 @@ fn parse_budget(budget: &str) -> Result<encounter::ConfigWeight, Box<dyn std::er
         "more" => encounter::ConfigWeight::More,
         "all" => encounter::ConfigWeight::All,
         "none" => encounter::ConfigWeight::None,
-        _ => return Err(Box::new(error::QueryError(format!("Bad budget string: {}", budget)))),
+        _ => {
+            return Err(Box::new(error::QueryError(format!(
+                "Bad budget string: {}",
+                budget
+            ))))
+        }
     };
     Ok(config_weight)
 }

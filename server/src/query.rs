@@ -79,7 +79,8 @@ WHERE level = ",
         let sql = query.sql();
 
         let mut monster_data = sqlx::query_with(sql, arguments)
-            .map(|row: PgRow| monster::MonsterData {
+        .map(|row: PgRow|
+             monster::MonsterData {
                 creature_id: row.get(0),
                 url: row.get(1),
                 name: row.get(2),
@@ -87,14 +88,15 @@ WHERE level = ",
                 alignment: row.get(4),
                 monster_type: row.get(5),
                 size: row.get(6),
-                is_caster: row.get(7),
-                is_ranged: row.get(8),
-                aquatic: row.get(9),
+                aquatic: row.get(7),
+                is_caster: row.get(8),
+                is_ranged: row.get(9),
             })
             .fetch_all(pool)
             .await?;
 
         let monster_traits = vec![String::from("Undead")];
+        println!("****MONSTER DATA***{:?}", monster_data);
 
         if monster_data.is_empty() {
             return Ok(None);

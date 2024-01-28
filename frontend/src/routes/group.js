@@ -1,6 +1,6 @@
 import { PUBLIC_MONSTER_API } from '$env/static/public';
 
-export class Group {
+export default class Group {
 		constructor(bbeg) {
 			this.url = "";
 			this.level = 0;
@@ -13,7 +13,7 @@ export class Group {
 			this.aquatic = false;
 			this.is_caster = false;
 			this.is_ranged = false;
-			this.is_found = false;
+			this.status = 'Pending';
 			this.bbeg = bbeg;
 		}
 
@@ -22,8 +22,7 @@ export class Group {
 			this.budget_constant = budget;
 		}
 
-	async newGroup() {
-		console.log('foo');
+	async newGroup(formData) {
 		const params = new URLSearchParams({
 			level: this.level,
 			party_level: formData.level,
@@ -63,5 +62,6 @@ export class Group {
 		this.aquatic = json.aquatic;
 		this.is_caster = json.is_caster;
 		this.is_ranged = json.is_ranged;
+		this.status = json.status;
 	}
 }
