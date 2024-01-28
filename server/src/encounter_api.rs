@@ -88,8 +88,13 @@ impl EncounterJson {
     async fn new(query_params: web::Query<QueryParams>) -> Self {
         let data = get_data(query_params).await;
         let (mut monsters, encounter) = data.unwrap();
-        println!("{:?}", encounter);
-        println!("{:?}", monsters);
+
+        println!("{}", encounter);
+
+        for monster in &monsters {
+            println!("{}", monster);
+        }
+
         let is_bbeg;
         let is_hench;
         let is_lackey;
@@ -102,7 +107,7 @@ impl EncounterJson {
             monster::Monster {
                 creature_id: 0,
                 url: String::from("None"),
-                name: String::from("None"),
+                name: String::from("Failed To find Monster"),
                 number: 0,
                 level: 0,
                 alignment: String::from("None"),
@@ -123,7 +128,7 @@ impl EncounterJson {
             monster::Monster {
                 creature_id: 0,
                 url: String::from("None"),
-                name: String::from("None"),
+                name: String::from("Failed To find Monster"),
                 number: 0,
                 level: 0,
                 alignment: String::from("None"),
@@ -144,7 +149,7 @@ impl EncounterJson {
             monster::Monster {
                 creature_id: 0,
                 url: String::from("None"),
-                name: String::from("None"),
+                name: String::from("Failed To find Monster"),
                 number: 0,
                 level: 0,
                 alignment: String::from("None"),
@@ -255,7 +260,6 @@ async fn get_data(query_params: web::Query<QueryParams>
     };
 
     let monsters = encounter.create().await?;
-    println!("{:?}", monsters);
     Ok((monsters, encounter))
 }
 

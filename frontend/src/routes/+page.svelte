@@ -129,6 +129,7 @@
 
 		const response = await fetch(`${PUBLIC_ENCOUNTER_API}${params.toString()}`);
 		const monster = await response.json();
+		console.log(monster)
 
 		const bbegData = {
 			url: monster.bbeg_url,
@@ -189,7 +190,7 @@
 		<Form formData={formData} submit={handleSubmit} />
 	</div>
 	<div class="cards">
-		{#if bbeg1.number !== 0}
+		{#if bbeg1.number !== 0 || bbeg1.name === "Failed To find Monster"}
 			<div class="card">
 				<Monster
 					bind:url={bbeg1.url}
@@ -204,7 +205,7 @@
 			</div>
 		{/if}
 
-{#if hench1.number !== 0}
+{#if hench1.number !== 0 || hench1.name === "Failed To find Monster"}
 	<div class="card">
 		<Monster
 			bind:url={hench1.url}
@@ -219,7 +220,7 @@
 	</div>
 {/if}
 
-{#if lackey1.number !== 0}
+{#if lackey1.number !== 0 || lackey1.name === "Failed To find Monster"}
 	<div class="card">
 		<Monster
 			bind:url={lackey1.url}

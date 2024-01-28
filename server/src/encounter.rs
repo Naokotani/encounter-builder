@@ -1,4 +1,5 @@
 use crate::monster;
+use std::fmt;
 use crate::query;
 use rand::Rng;
 use serde::Deserialize;
@@ -29,6 +30,7 @@ pub struct Encounter {
     pub lackey_caster: EitherBool,
     pub lackey_ranged: EitherBool,
 }
+
 
 #[allow(dead_code)]
 #[derive(Debug, Deserialize)]
@@ -73,6 +75,7 @@ pub struct Configuration {
     pub henchman: ConfigWeight,
     pub lackey: ConfigWeight,
 }
+
 
 #[derive(PartialEq, Debug)]
 pub enum FillStatus {
@@ -528,5 +531,65 @@ impl Encounter {
                 _ => None,
             }
         }
+    }
+}
+
+impl fmt::Display for Encounter {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "\
+    level: {} party_size: {} budget: {}
+    difficulty: {:?}
+    monster_types: {:?}
+    traits: {:?}
+    configuration: {}
+    bbeg_budget: {}
+    bbeg_level: {:?}
+    hench_budget: {}
+    hench_level: {:?}
+    lackey_budget: {}
+    lackey_level: {:?}
+    bbeg_status: {:?} bbeg_caster: {:?} bbeg_ranged: {:?}
+    hench_status: {:?} hench_caster: {:?} hench_ranged: {:?}
+    lackey_status: {:?} lackey_caster: {:?} lackey_ranged: {:?}\n",
+            self.level,
+            self.party_size,
+            self.budget,
+            self.difficulty,
+            self.monster_types,
+            self.traits,
+            self.configuration,
+            self.bbeg_budget,
+            self.bbeg_level,
+            self.hench_budget,
+            self.hench_level,
+            self.lackey_budget,
+            self.lackey_level,
+            self.bbeg_status,
+            self.bbeg_caster,
+            self.bbeg_ranged,
+            self.hench_status,
+            self.hench_caster,
+            self.hench_ranged,
+            self.lackey_status,
+            self.lackey_caster,
+            self.lackey_ranged,
+        )
+    }
+}
+
+impl fmt::Display for Configuration {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "
+            bbeg: {:?}
+            henchman: {:?}
+            lackey: {:?}",
+            self.bbeg,
+            self.henchman,
+            self.lackey,
+        )
     }
 }
