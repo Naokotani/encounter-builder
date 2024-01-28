@@ -37,7 +37,6 @@ export default class Group {
   try {
     const response = await fetch(`${PUBLIC_MONSTER_API}${params.toString()}`);
     const json = await response.json();
-		console.log(json);
     if (json) {
       this.updateGroupData(json);
 			this.found = true;
@@ -45,7 +44,6 @@ export default class Group {
       this.is_found = false;
     }
   } catch (error) {
-    console.error('Error fetching monster data:', error);
     this.is_found = false;
   }
 

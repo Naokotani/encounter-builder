@@ -8,7 +8,8 @@
 	export let level;
 </script>
 
-<a rel="external" href={url}>
+<a rel="external noopener noreferrer"
+href={url} target="_blank">
 	<h2>{name}</h2>
 </a>
 <h3>XP cost: {budget}</h3>
