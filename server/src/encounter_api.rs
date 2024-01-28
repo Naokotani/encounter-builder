@@ -44,7 +44,6 @@ struct EncounterJson {
     bbeg_aquatic: bool,
     bbeg_is_caster: bool,
     bbeg_is_ranged: bool,
-    is_bbeg: bool,
     bbeg_status: String,
 
     hench_budget: f32,
@@ -57,7 +56,6 @@ struct EncounterJson {
     hench_aquatic: bool,
     hench_is_caster: bool,
     hench_is_ranged: bool,
-    is_hench: bool,
     hench_status: String,
 
     lackey_budget: f32,
@@ -70,7 +68,6 @@ struct EncounterJson {
     lackey_aquatic: bool,
     lackey_is_caster: bool,
     lackey_is_ranged: bool,
-    is_lackey: bool,
     lackey_status: String,
 }
 
@@ -89,7 +86,7 @@ impl Responder for EncounterJson {
 impl EncounterJson {
     async fn new(query_params: web::Query<QueryParams>) -> Self {
         let data = get_data(query_params).await;
-        let (mut monsters, encounter) = data.unwrap();
+        let (monsters, encounter) = data.unwrap();
 
         println!("{}", encounter);
 
@@ -97,72 +94,14 @@ impl EncounterJson {
             println!("{}", monster);
         }
 
-        let is_bbeg;
-        let is_hench;
-        let is_lackey;
+        let lackey_level = encounter.lackey_level.unwrap_or(encounter.level - 3);
+        let (lackey, monsters) = get_monster(&encounter.lackey_status, lackey_level, monsters);
 
-        let lackey = if encounter.lackey_status == encounter::FillStatus::Filled {
-            is_lackey = true;
-            monsters.pop().unwrap()
-        } else {
-            is_lackey = false;
-            monster::Monster {
-                creature_id: 0,
-                url: String::from("None"),
-                name: String::from("Failed To find Monster"),
-                number: 0,
-                level: encounter.lackey_level.unwrap_or(encounter.level - 3),
-                alignment: String::from("None"),
-                monster_type: String::from("None"),
-                size: String::from("None"),
-                traits: vec![String::from("None")],
-                aquatic: false,
-                is_caster: false,
-                is_ranged: false,
-            }
-        };
+        let hench_level = encounter.hench_level.unwrap_or(encounter.level);
+        let (henchmen, monsters) = get_monster(&encounter.hench_status, hench_level, monsters);
 
-        let henchmen = if encounter.hench_status == encounter::FillStatus::Filled {
-            is_hench = true;
-            monsters.pop().unwrap()
-        } else {
-            is_hench = false;
-            monster::Monster {
-                creature_id: 0,
-                url: String::from("None"),
-                name: String::from("Failed To find Monster"),
-                number: 0,
-                level: encounter.hench_level.unwrap_or(encounter.level),
-                alignment: String::from("None"),
-                monster_type: String::from("None"),
-                size: String::from("None"),
-                traits: vec![String::from("None")],
-                aquatic: false,
-                is_caster: false,
-                is_ranged: false,
-            }
-        };
-
-        let bbeg = if encounter.bbeg_status == encounter::FillStatus::Filled {
-            is_bbeg = true;
-            monsters.pop().unwrap()
-        } else {
-            is_bbeg = false;
-            monster::Monster {
-                creature_id: 0,
-                url: String::from("None"),
-                name: String::from("Failed To find Monster"),
-                number: 0,
-                level: encounter.bbeg_level.unwrap(),
-                alignment: String::from("None"),
-                monster_type: String::from("None"),
-                size: String::from("None"),
-                traits: vec![String::from("None")],
-                aquatic: false,
-                is_caster: false,
-                is_ranged: false,
-            }
-        };
+        let bbeg_level = encounter.bbeg_level.unwrap();
+        let (bbeg, _) = get_monster(&encounter.bbeg_status, bbeg_level, monsters);
 
         let bbeg_status = parse_status(encounter.bbeg_status);
         let hench_status = parse_status(encounter.hench_status);
@@ -181,7 +120,6 @@ impl EncounterJson {
             bbeg_aquatic: bbeg.aquatic,
             bbeg_is_caster: bbeg.is_caster,
             bbeg_is_ranged: bbeg.is_ranged,
-            is_bbeg,
             bbeg_status,
 
             hench_budget: encounter.hench_budget,
@@ -194,7 +132,6 @@ impl EncounterJson {
             hench_aquatic: henchmen.aquatic,
             hench_is_caster: henchmen.is_caster,
             hench_is_ranged: henchmen.is_ranged,
-            is_hench,
             hench_status,
 
             lackey_budget: encounter.lackey_budget,
@@ -207,10 +144,10 @@ impl EncounterJson {
             lackey_aquatic: lackey.aquatic,
             lackey_is_caster: lackey.is_caster,
             lackey_is_ranged: lackey.is_ranged,
-            is_lackey,
             lackey_status,
         }
     }
+
 }
 
 async fn get_data(
@@ -318,4 +255,26 @@ fn parse_budget(budget: &str) -> Result<encounter::ConfigWeight, Box<dyn std::er
         }
     };
     Ok(config_weight)
+}
+
+fn get_monster(status: &encounter::FillStatus, level: i32, mut monsters:Vec<monster::Monster>) -> (monster::Monster, Vec<monster::Monster>) {
+    let monster = if status == &encounter::FillStatus::Filled {
+        monsters.pop().unwrap()
+    } else {
+        monster::Monster {
+            creature_id: 0,
+            url: String::from("None"),
+            name: String::from("Failed To find Monster"),
+            number: 0,
+            level,
+            alignment: String::from("None"),
+            monster_type: String::from("None"),
+            size: String::from("None"),
+            traits: vec![String::from("None")],
+            aquatic: false,
+            is_caster: false,
+            is_ranged: false,
+        }
+    };
+    (monster, monsters)
 }
