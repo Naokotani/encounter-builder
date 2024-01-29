@@ -413,7 +413,7 @@ impl Encounter {
             hench_mod = rng.gen_range(-2..=0);
         } else if self.hench_level.is_none() && self.hench_budget >= 30.0 {
             hench_mod = rng.gen_range(-1..=0);
-        } else if self.hench_level.is_none() && self.level > 1 && self.hench_budget >= 20.0 {
+        } else if self.hench_level.is_none() && self.hench_budget >= 20.0 {
             hench_mod = -2;
         } else if self.hench_level.is_none() {
             self.hench_status = FillStatus::Skipped;
