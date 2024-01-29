@@ -96,11 +96,13 @@ WHERE level = ",
             .await?;
 
         let monster_traits = vec![String::from("Undead")];
-        println!("****MONSTER DATA***{:?}", monster_data);
 
         if monster_data.is_empty() {
+            println!("Search for level: {} caster: {:?} ranged: {:?} type: {:?} produced no results",
+            level, params.is_caster, params.is_ranged, monster_types);
             return Ok(None);
         }
+
         let mut rng = rand::thread_rng();
         let random_monster = monster_data.remove(rng.gen_range(0..monster_data.len()));
 

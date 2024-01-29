@@ -100,7 +100,7 @@ impl EncounterJson {
         let hench_level = encounter.hench_level.unwrap_or(encounter.level);
         let (henchmen, monsters) = get_monster(&encounter.hench_status, hench_level, monsters);
 
-        let bbeg_level = encounter.bbeg_level.unwrap();
+        let bbeg_level = encounter.bbeg_level.unwrap_or(0);
         let (bbeg, _) = get_monster(&encounter.bbeg_status, bbeg_level, monsters);
 
         let bbeg_status = parse_status(encounter.bbeg_status);
