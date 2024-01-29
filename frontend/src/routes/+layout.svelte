@@ -1,5 +1,6 @@
 <script>
   import '../styles.css';
+  import '../normalize.css';
 </script>
 
 <div class="layout">

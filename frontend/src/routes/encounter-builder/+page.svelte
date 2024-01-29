@@ -132,6 +132,7 @@
 		{#if bbeg1.number !== 0 || bbeg1.status === 'Failed'}
 			<div class="card">
 				<Monster
+					title="Big Bad Evil Guy"
 					bind:url={bbeg1.url}
 					bind:level={bbeg1.level}
 					bind:name={bbeg1.name}
@@ -147,6 +148,7 @@
 {#if hench1.number !== 0 || hench1.status === 'Failed'}
 	<div class="card">
 		<Monster
+			title="Henchmen"
 			bind:url={hench1.url}
 			bind:name={hench1.name}
 			bind:level={hench1.level}
@@ -162,6 +164,7 @@
 {#if lackey1.number !== 0 || lackey1.status === 'Failed'}
 	<div class="card">
 		<Monster
+			title="Henchmen"
 			bind:url={lackey1.url}
 			bind:name={lackey1.name}
 			bind:level={lackey1.level}

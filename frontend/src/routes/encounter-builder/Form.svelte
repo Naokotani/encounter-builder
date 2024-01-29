@@ -77,8 +77,14 @@
 		formData.lackey.budget = formData.bbeg.budget === 'all' || formData.hench.budget === 'all'?
 			'none':formData.lackey.budget;
 	}
+	$: henchBudget = formData.lackey.budget
+		=== 'all'? monsterBudget: [
+		{value: 'all', label: 'All'},
+		{value: 'none', label: 'None'}];
+	$: disableSubmit = formData.bbeg.budget !== 'all' &&
+	formData.hench.budget !== 'all' && formData.lackey.budget !== 'all';
+  $: submitInfoClass = disableSubmit? "":"submitInfoClass";
 </script>
-
 <form on:submit|preventDefault={submit} style="width=30%;">
 	<h2>Encounter Options</h2>
 	<div>
@@ -101,7 +107,6 @@
 		selected={2}
 		bind:value={formData.difficulty}/>
 	<br/>
-		
 	</div>
 	<h2>Monsters Options</h2>
 	<p class="instructions">
@@ -111,7 +116,12 @@
 		results. 'More', 'Half' and 'less' represents the amount of
 		remaining budget that will be used on that monster group.
 	</p>
-	<button class="submit" type="submit">Roll the dice</button>
+	<button disabled={disableSubmit} class="submit" type="submit">Roll the dice</button>
+	<div class={submitInfoClass}>
+		<small>
+			You must use your full budget by setting one group to 'all'
+		</small>
+	</div>
 	<h3>Big Bad Evil Guy</h3>
 	<p class="instructions">Solo monster up to 4 levels about the party depending on budget.</p>
 	<Select
@@ -120,7 +130,6 @@
 		bind:value={formData.bbeg.budget}/>
 	<br/>
 	<div class="grid">
-		
 	<Radio
 		options={eitherBools}
 		type="Ranged?"
@@ -136,12 +145,13 @@
 </label>
 	<h3>Henchmen</h3>
 	<p class="instructions">
-		Group of monsters between party level and party level -2.
+		Group of monsters between party level and party level -2. Set
+		lackeys to "All" to enable more options.
 	</p>
 	<Select
 		label="Henchmen Budget"
 		bind:disabled={disabled}
-		options={monsterBudget}
+		options={henchBudget}
 		bind:value={formData.hench.budget}/>
 	<br/>
 	<div class="grid">
@@ -150,7 +160,6 @@
 			type="Ranged?"
 			bind:disabled={disabled}
 			bind:userSelected={formData.hench.ranged}/>
-
 		<Radio
 			options={eitherBools}
 			type="Caster?"
@@ -165,7 +174,8 @@
 	<h3>Lackeys</h3>
 	<p class="instructions">
 		Group of weaker monsters that are party level -3 or -4.
-		Party must be at least level 2. 
+		Party must be at least level 2. To enable, neither Big
+		Bad Evil Guy nor Henchmen can be set to "all".
 	</p>
 	<Select
 		label="Lackey Budget"
@@ -200,5 +210,13 @@
 	.submit {
 		font-size: var(--h5);
 		padding: 0.5rem 1rem;
+	}
+	.submit:disabled {
+		margin: 0;
+	}
+
+	.submitInfoClass>small {
+		visibility: hidden;
+		height: 0.8rem;
 	}
 </style>

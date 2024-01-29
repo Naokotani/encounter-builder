@@ -1,4 +1,5 @@
 <script>
+	export let title;
 	export let url;
 	export let budget;
 	export let name;
@@ -12,6 +13,7 @@
 href={url} target="_blank">
 	<h2>{name}</h2>
 </a>
+	<h3>{title}</h3>
 <h3>XP cost: {budget}</h3>
 <ul>
 	<li>number: {number}</li>

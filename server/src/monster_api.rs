@@ -147,8 +147,9 @@ struct MonsterBudget {
 
 fn lackey_budget(party_level: i32, level: i32, budget: i32) -> MonsterBudget {
     let lackey_mod = match level {
-        -3 if party_level > 3 && budget >= 15 => -4,
+        -3 if party_level > 3 && budget >= 20 => -4,
         -4 => -3,
+        -3 => -3,
         _ => panic!("Level mod out of range {}", level),
     };
     let mut budget = budget as f32;
