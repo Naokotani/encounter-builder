@@ -18,7 +18,7 @@
   }
 </script>
 
-
+<div class="grid aside-left">
 <label for={label}>{label}</label>
 <select disabled={disabled} bind:value={value} on:change={handleSelectChange}>
   {#if options.length > 0}
@@ -29,3 +29,24 @@
     <option value="">No options available</option>
   {/if}
 </select>
+</div>
+
+<style>
+	.grid {
+		max-width: var(--formWidth);
+	}
+	select {
+		width: 30%;
+		max-height: 2rem;
+		margin-bottom: 5px;
+	}
+
+@media (min-width: 767px) {
+	.card {
+		max-width: 50%;
+	}
+	select {
+		width: 60%;
+	}
+}
+</style>

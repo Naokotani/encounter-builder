@@ -13,8 +13,8 @@
 href={url} target="_blank">
 	<h2>{name}</h2>
 </a>
-	<h3>{title}</h3>
-<h3>XP cost: {budget}</h3>
+<p class="card-subheader">
+XP: {budget}</p>
 <ul>
 	<li>number: {number}</li>
 	<li>level: {level}</li>
@@ -44,6 +44,14 @@ href={url} target="_blank">
 		color: var(--black);
 	}
 
+	.card-subheader {
+		font-size: var(--h5);
+		margin-top: 0.25rem;
+		margin-bottom: 0;
+		line-height: var(--h5);
+
+	}
+
 	h3 {
 		margin: 0;
 		font-size: var(--h4);
@@ -53,4 +61,5 @@ href={url} target="_blank">
 		text-decoration: none;
 		color: var(--anchorColor);
 	}
+
 </style>

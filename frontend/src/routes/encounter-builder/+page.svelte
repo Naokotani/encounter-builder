@@ -124,11 +124,11 @@
 		lackey1 = lackey1;
 	}
 </script>
-<div class="grid aside-left">
+<div class="grid aside-right">
 	<div class="form">
 		<Form formData={formData} submit={handleSubmit} />
 	</div>
-	<div class="cards">
+	<div class="cards" id="monster-div">
 		{#if bbeg1.number !== 0 || bbeg1.status === 'Failed'}
 			<div class="card">
 				<Monster
@@ -180,12 +180,17 @@
 </div>
 <style>
 .card {
-	max-width: 30%;
   background: var(--cardBg);
   color: var(--cardText);
   padding: 2rem;
   border-radius: 3px;
 	margin-bottom: 1rem;
+}
+
+@media (min-width: 767px) {
+	.card {
+		max-width: 50%;
+	}
 }
 
 .cards {

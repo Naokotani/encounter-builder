@@ -63,6 +63,7 @@
   --line: solid 2px var(--lineColor);
   --headerHeight: 5rem;
   --containerPadding: 10%;
+	--formWidth: 30rem;
 
   /*Elevations*/
   --level-1: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
@@ -152,34 +153,33 @@ button.small {
   font-size: var(--smallText);
 }
 
-aside img {
-	max-width: 100%;
+.underline {
+	border-bottom: var(--line);
 }
 
-.grid {
+
+@media (min-width: 767px) {
+	.grid {
     --gridCols: 2;
     display: grid;
     grid-template-columns: repeat(var(--gridCols), 1fr);
     gap: 5px;
-}
+	}
 
-.grid img {
-	margin-bottom: 1rem;
-}
+	.grid img {
+		margin-bottom: 1rem;
+	}
 
-.aside-right {
+	.aside-right {
     grid-template-columns: 66% 32%;
     grid-gap: 2%;
-}
+	}
 
-.aside-left {
+	.aside-left {
     grid-template-columns: 32% 66%;
     grid-gap: 2%;
-}
+	}
 
-.underline {
-	border-bottom: var(--line);
-}
 
 .cols-3 {
     --gridCols: 3;
@@ -187,5 +187,6 @@ aside img {
 
 .cols-4 {
     --gridCols: 4;
+}
 }
 
