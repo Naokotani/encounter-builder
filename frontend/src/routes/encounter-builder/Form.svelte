@@ -62,14 +62,12 @@
   onMount(() => {
     const mediaQuery = window.matchMedia('(max-width: 767px)');
     isMobile = mediaQuery.matches;
-		console.log(isMobile)
   });
 
   function scrollToId() {
     if (isMobile && !disableSubmit) {
       const element = document.getElementById('monster-div');
       if (element) {
-				console.log("sroll")
         element.scrollIntoView({ behavior: 'smooth' });
       }
     }
@@ -161,8 +159,7 @@
 	<div>
 		<h3>Henchmen</h3>
 		<p class="instructions">
-			Group of monsters between party level and party level -2. Set
-			lackeys to "All" to enable more options.
+			Group of monsters between party level and party level -2.
 		</p>
 		<Select
 			label="Henchmen Budget"
