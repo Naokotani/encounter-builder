@@ -1,42 +1,9 @@
-  /* Color scheme */
-    /* --purple: #724ea7; */
-    /* --purple: #a591ff; */
-    /* --blue: #5086e4; */
-    /* --yellow: #fff291; */
-    /* --pink: #ff76a8; */
-    /* --white: #fefefe; */
-    /* --black: #2b2b2b; */
-
-    /* define colors intentions */
-    /* --primary: var(--purple); */
-    /* --danger: var(--pink); */
-    /* --accent: var(--yellow); */
-    /* --shadow: var(--darkPurple); */
-    /* --background: var(--black); */
-    /* --textColor: var(--white); */
-    /* --headerColor: var(--white); */
-    /* --blockTextColor: var(--white); */
-    /* --lineColor: var(--purple); */
-    /* --buttonTextColor: var(--white); */
-    /* --strong: var(--purple); */
-
-
-    /* Styles */
-    /* --line: solid 1px var(--lineColor); */
-    /* --linkUnderline: solid 1px var(--yellow); */
-
 @import url('https://fonts.googleapis.com/css?family=Space+Mono:400|Mulish:400|UnifrakturMaguntia:400');
 
 :root {
-  /*Color pallette*/
-  --lightGreen: #DFE8AC;
-  --green: #848A66;
-  --darkGreen: #58612B;
-  --beige: #D7E0A6;
-  --darkBeige: #AEB586;
-  --yellow: #fff291;
-  --purple: #300150;
+  /*Light mode pallette*/
 
+  --purple: #300150;
   --blue: aqua;
   --white: #fefefe;
   --lightGrey: #bfbfbf;
@@ -44,9 +11,7 @@
   --darkGrey: #2b2b2b;
   --black: #141414;
 
-  /*Color Intentions*/
-
-
+  /*Light Mode Intentions*/
   --linkUnderline: var(--blue);
   --background: var(--white);
   --textColor: var(--darkGrey);
@@ -57,7 +22,8 @@
 	--anchorColor: var(--grey);
 	--buttonColor: var(--darkGrey);
 	--buttonText: var(--white);
-	--buttonHover: var(--blue);
+	--navColor: var(--lightGrey);
+	--linkHover: var(--black);
 
   /*Styles*/
   --line: solid 2px var(--lineColor);
@@ -86,6 +52,24 @@
   --smallText: 0.8rem;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+		/* dark mode intentions */
+  --linkUnderline: var(--blue);
+  --background: var(--black);
+  --textColor: var(--white);
+  --lineColor: var(--purple);
+  --headerText: var(--white);
+  --cardBg: var(--darkGrey);
+  --cardText: var(--white);
+	--anchorColor: var(--lightGrey);
+	--buttonColor: var(--lightGrey);
+	--buttonText: var(--black);
+	--navColor: var(--darkGrey);
+	--linkHover: var(--white);
+  }
+}
+
 html {font-size: 100%;} /*16px*/
 
 body {
@@ -93,7 +77,7 @@ body {
   font-family: 'Space Mono', monospace;
   font-weight: 400;
   line-height: 1.75;
-  color: var(--black);
+  color: var(--textColor);
 }
 
 /*Typography*/

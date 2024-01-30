@@ -38,7 +38,7 @@ nav li + li {
 }
 
 nav {
-  background: var(--lightGrey);
+  background: var(--navColor);
   position: fixed;
   top: 0;
   left: 0;
