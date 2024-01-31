@@ -3,30 +3,33 @@
 :root {
   /*Light mode pallette*/
 
-  --purple: #300150;
-  --blue: aqua;
   --white: #fefefe;
   --lightGrey: #bfbfbf;
   --grey: #404040;
   --darkGrey: #2b2b2b;
   --black: #141414;
+	--darkRed: #800000;
+	--red: #ff0000;
 
   /*Light Mode Intentions*/
   --linkUnderline: var(--blue);
   --background: var(--white);
   --textColor: var(--darkGrey);
-  --lineColor: var(--purple);
+  --lineColor: var(--grey);
   --headerText: var(--black);
   --cardBg: var(--lightGrey);
   --cardText: var(--black);
-	--anchorColor: var(--grey);
+	--anchorColor: var(--darkRed);
 	--buttonColor: var(--darkGrey);
 	--buttonText: var(--white);
-	--buttonHoverText: white;
+	--buttonHoverText: var(--red);
 	--navColor: var(--lightGrey);
 	--linkHover: var(--black);
 	--modalText: var(--black);
 	--modalColor: var(--lightGrey);
+	--bbeg-color: #993114;
+	--hench-color: #143199;
+	--lackey-color: #5B9914;
 
   /*Styles*/
   --line: solid 2px var(--lineColor);
@@ -52,10 +55,10 @@
   --h3: 1.953rem;
   --h4: 1.563rem;
   --h5: 1.25rem;
-  --smallText: 0.8rem;
+ --smallText: 0.8rem;
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
 		/* dark mode intentions */
   --linkUnderline: var(--blue);
@@ -65,10 +68,10 @@
   --headerText: var(--white);
   --cardBg: var(--darkGrey);
   --cardText: var(--white);
-	--anchorColor: var(--lightGrey);
+	--anchorColor: var(--red);
 	--buttonColor: var(--white);
 	--buttonText: var(--grey);
-	--buttonHoverText: var(--black);
+	--buttonHoverText: var(--darkRed);
 	--navColor: var(--darkGrey);
 	--linkHover: var(--white);
 	--modalText: var(--white);
@@ -116,7 +119,6 @@ small, .text_small {font-size: var(--smallText);}
 a:hover {
 	--lineColor: var(--linkHover);
 	border-bottom: solid 2px var(--lineColor);
-	color: var(--linkHover);
 }
 
 a {
@@ -160,7 +162,7 @@ button.small {
 }
 
 
-@media (min-width: 767px) {
+@media (min-width: 1025px) {
 	.grid {
     --gridCols: 2;
     display: grid;
@@ -183,12 +185,12 @@ button.small {
 	}
 
 
-.cols-3 {
+	.cols-3 {
     --gridCols: 3;
-}
+	}
 
-.cols-4 {
+	.cols-4 {
     --gridCols: 4;
-}
+	}
 }
 

@@ -124,13 +124,13 @@
 		lackey1 = lackey1;
 	}
 </script>
-<div class="grid aside-right">
+<div class="form-grid">
 	<div class="form">
 		<Form formData={formData} submit={handleSubmit} />
 	</div>
 	<div class="cards" id="monster-div">
 		{#if bbeg1.number !== 0 || bbeg1.status === 'Failed'}
-			<div class="card">
+			<div class="card slide-from-right">
 				<Monster
 					title="Big Bad Evil Guy"
 					bind:url={bbeg1.url}
@@ -141,12 +141,12 @@
 					bind:alignment={bbeg1.alignment}
 					bind:type={bbeg_type}
 					/>
-				<button on:click={handleBbeg}>New Monster</button>
+				<button class="new-monster" on:click={handleBbeg}>New Monster</button>
 			</div>
 		{/if}
 
 {#if hench1.number !== 0 || hench1.status === 'Failed'}
-	<div class="card">
+	<div class="card slide-from-right">
 		<Monster
 			title="Henchmen"
 			bind:url={hench1.url}
@@ -157,12 +157,12 @@
 			bind:alignment={hench1.alignment}
 			bind:type={hench_type}
 			/>
-		<button on:click={handleHench}>New Monster</button>
+		<button class="new-monster" on:click={handleHench}>New Monster</button>
 	</div>
 {/if}
 
 {#if lackey1.number !== 0 || lackey1.status === 'Failed'}
-	<div class="card">
+	<div class="card slide-from-right">
 		<Monster
 			title="Henchmen"
 			bind:url={lackey1.url}
@@ -173,12 +173,16 @@
 			bind:alignment={lackey1.alignment}
 			bind:type={lackey_type}
 			/>
-		<button on:click={handleLackey}>New Monster</button>
+		<button class="new-monster" on:click={handleLackey}>New Monster</button>
 	</div>
 {/if}
 	</div>
 </div>
 <style>
+.cards {
+	margin-top: 3rem;
+}
+
 .card {
   background: var(--cardBg);
   color: var(--cardText);
@@ -187,13 +191,38 @@
 	margin-bottom: 1rem;
 }
 
-@media (min-width: 767px) {
+@media (min-width: 1500px) {
 	.card {
-		max-width: 50%;
+		max-width: 33%;
+	}
+
+	.form-grid {
+    grid-template-columns: 66% 33%;
+		display: grid;
+		gap: 5rem;
 	}
 }
 
-.cards {
-	margin-top: 3rem;
+@media only screen and (min-width: 768px) and (max-width: 1500px) {
+	.card {
+		max-width: 25vw;
+		height: 25rem;
+	}
+
+	.cards {
+		max-width: 95vw;
+	}
+
+	.new-monster {
+		margin-bottom: 1rem;
+	}
+
+	#monster-div {
+		display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+	}
 }
+
+
 </style>

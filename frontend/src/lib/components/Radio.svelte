@@ -34,7 +34,7 @@ onMount(() => {
 		padding-left: 2rem;
 	}
 	.radio {
-		padding-right: 60%;
+		padding-right: 40%;
 	}
 	label {
 		text-align: left;

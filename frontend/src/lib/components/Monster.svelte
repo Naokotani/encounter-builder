@@ -10,11 +10,11 @@
 </script>
 
 <a rel="external noopener noreferrer"
-href={url} target="_blank">
+	 href={url} target="_blank">
 	<h2>{name}</h2>
 </a>
 <p class="card-subheader">
-XP: {budget}</p>
+	XP: {budget}</p>
 <ul>
 	<li>number: {number}</li>
 	<li>level: {level}</li>
@@ -23,11 +23,15 @@ XP: {budget}</p>
 </ul>
 
 <style>
+	a {
+		max-width: 100%;
+	}
+
 	h2 {
 		font-size: var(--h3);
 		margin: 0;
-		border-bottom: var(--line);
-		display: inline-block;
+		text-overflow: ellipsis;
+		overflow: hidden;
 	}
 
 	ul {
@@ -50,6 +54,4 @@ XP: {budget}</p>
 		margin: 0;
 		font-size: var(--h4);
 	}
-
-
 </style>

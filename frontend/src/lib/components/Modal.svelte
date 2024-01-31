@@ -1,26 +1,26 @@
 <script>
+	import { goto } from '$app/navigation';
+	import { Instructions } from '$lib'
   let isOpen = false;
 
   function openModal() {
-    isOpen = true;
+		if (window.matchMedia('(max-width: 767px)').matches) {
+			goto('/encounter-builder/instructions')
+		} else {
+			isOpen = true;
+		}
   }
-
+ 
   function closeModal() {
     isOpen = false;
   }
+
 </script>
 
 {#if isOpen}
   <div class="modal">
     <div class="modal-content">
-      <h2>Encounter Builder Instructions</h2>
-      <p>
-				Pick the budget you want to assign to each monster type.
-				Setting a monster budget to 'all' will disable the monsters
-				below it. 'None' will remove that monster group from the
-				results. 'More', 'Half' and 'less' represents the amount of
-				remaining budget that will be used on that monster group.
-			</p>
+			<Instructions />
       <button type="button" on:click={closeModal}>Close</button>
     </div>
   </div>
@@ -40,14 +40,17 @@
     justify-content: center;
     align-items: center;
 		color: var(--modalText);
+			padding: 20px;
+			width: 100%;
   }
 
   .modal-content {
     background: var(--modalColor);
-		max-width: 60%;
-    padding: 20px;
     border-radius: 5px;
     box-shadow: var(--level-4);
+		padding: 20px;
+		max-width: 100%;
+		max-width: 60%
   }
 
 	button {

@@ -75,77 +75,30 @@
 		{value: 'none', label: 'None'},
 	];
 
+	function calcBudget(value, budget, i) {
+		if (value === 'all') {
+			percentages[i] = budget;
+		} else if (value === 'even') {
+			percentages[i] = budget * 0.5;
+		} else if (value === 'less') {
+			percentages[i] = budget * 0.25;
+		} else if (value === 'none') {
+			percentages[i] = 0;
+		} else if (value === 'more') {
+			percentages[i] = budget * 0.75;
+		}
+
+		return budget - percentages[i];
+	}
+
 	let budget = 100;
-	let percentages = [0 ,100 , 0, 0]; // Example percentages for three groups
+	let percentages = [100 ,0 , 0, 0]; // Example percentages for three groups
 	function handleBudgetChange() {
 		budget = 100;
-		if (formData.bbeg.budget === 'all') {
-			console.log(formData.bbeg.budget)
-			percentages[0] = 100;
-			budget -= 100;
-		} else if (formData.bbeg.budget === 'even') {
-			console.log(formData.bbeg.budget)
-			percentages[0] = 50;
-			budget -= 50;
-		} else if (formData.bbeg.budget === 'less') {
-			console.log(formData.bbeg.budget)
-			percentages[0] = 25;
-			budget -= 25;
-		} else if (formData.bbeg.budget === 'none') {
-			console.log(formData.bbeg.budget)
-			percentages[0] = 0;
-		} else if (formData.bbeg.budget === 'more') {
-			percentages[0] = 75;
-			budget -= 75;
-		}
 
-		console.log(budget)
-		if (formData.hench.budget === 'all') {
-			console.log(formData.hench.budget)
-			percentages[1] = budget;
-			budget = 0;
-		} else if (formData.hench.budget === 'even') {
-			console.log(formData.hench.budget)
-			percentages[1] = budget * 0.5;
-			budget -= budget * 0.5 
-		} else if (formData.hench.budget === 'less') {
-			console.log(formData.hench.budget)
-			percentages[1] = budget * 0.25;
-			budget -= budget * 0.25;
-		} else if (formData.hench.budget === 'none') {
-			console.log(formData.hench.budget)
-			percentages[1] = 0;
-		} else if (formData.hench.budget === 'more') {
-			percentages[1] = budget * 0.75;
-			budget -= budget * 0.75;
-		}
-
-		if (formData.lackey.budget === 'all') {
-			console.log(formData.lackey.budget)
-			percentages[2] = budget;
-			budget = 0;
-		} else if (formData.lackey.budget === 'even') {
-			console.log(formData.lackey.budget)
-			percentages[2] = budget * 0.5;
-			budget -= budget * 0.5 
-		} else if (formData.lackey.budget === 'less') {
-			console.log(formData.lackey.budget)
-			percentages[2] = budget * 0.25;
-			budget -= budget * 0.25;
-		} else if (formData.lackey.budget === 'none') {
-			console.log(formData.lackey.budget)
-			percentages[2] = 0;
-		} else if (formData.lackey.budget === 'more') {
-			percentages[2] = budget * 0.75;
-			budget -= budget * 0.75;
-		}
-
-		console.log(percentages[1]);
-
-
-
-
-		
+		budget = calcBudget(formData.bbeg.budget, budget, 0);
+		budget = calcBudget(formData.hench.budget, budget, 1);
+		budget = calcBudget(formData.lackey.budget, budget, 2);
 	}
 
 	let levels = []
@@ -173,7 +126,7 @@
 	formData.hench.budget !== 'all' && formData.lackey.budget !== 'all';
   $: submitInfoClass = disableSubmit? "":"submitInfoClass";
 </script>
-<form class="grid"  on:submit|preventDefault={submit} style="width=30%;">
+<form class="form-grid"  on:submit|preventDefault={submit}>
 	<div>
 		<div>
 			<div>
@@ -201,7 +154,7 @@
 				</div>
 			</div>
 		</div>
-		<h3>Big Bad Evil Guy</h3>
+		<h3>Big Bad Evil Guy<div class="group-color bbeg-color"></div></h3>
 		<p class="instructions">Solo monster up to 4 levels about the party depending on budget.</p>
 		<Select
 			handleBudgetChange={handleBudgetChange}
@@ -209,7 +162,7 @@
 			options={monsterBudget}
 			bind:value={formData.bbeg.budget}/>
 		<br/>
-		<div class="grid">
+		<div class="radio-grid">
 			<Radio
 				options={eitherBools}
 				type="Ranged?"
@@ -226,7 +179,7 @@
 		<Budget percentages={percentages}/>
 	</div>
 	<div>
-		<h3>Henchmen</h3>
+		<h3>Henchmen<div class="group-color hench-color"></div></h3>
 		<p class="instructions">
 			Group of monsters between party level and party level -2.
 		</p>
@@ -237,7 +190,7 @@
 			options={monsterBudget}
 			bind:value={formData.hench.budget}/>
 		<br/>
-		<div class="grid">
+		<div class="radio-grid">
 			<Radio
 				options={eitherBools}
 				type="Ranged?"
@@ -253,8 +206,7 @@
 			Aquatic?
 			<input type="checkbox" bind:checked={formData.hench.aquatic} />
 		</label>
-
-		<h3>Lackeys</h3>
+		<h3>Lackeys<div class="group-color lackey-color"></div></h3>
 		<p class="instructions">
 			Group of weaker monsters that are party level -3 or -4.
 			Party must be at least level 2.</p>
@@ -264,7 +216,7 @@
 			bind:disabled={disabledLackey}
 			options={lackeyBudget}
 			bind:value={formData.lackey.budget}/>
-		<div class="grid">
+		<div class="radio-grid">
 			<Radio
 				options={eitherBools}
 				bind:disabled={disabledLackey}
@@ -309,4 +261,60 @@
 		visibility: hidden;
 		height: 0.8rem;
 	}
+
+	.group-color {
+		height: var(--h3);
+		width: var(--h3);
+		display: inline-block;
+		border-radius: var(--h3);
+		margin-left: 1rem;
+		visibility: hidden;
+	}
+
+	.bbeg-color {
+		background-color: var(--bbeg-color);
+	}
+
+	.hench-color {
+		background-color: var(--hench-color);
+	}
+
+	.lackey-color {
+		background-color: var(--lackey-color);
+	}
+
+	.radio-grid {
+    --gridCols: 2;
+    display: grid;
+    grid-template-columns: repeat(var(--gridCols), 1fr);
+    gap: 5px;
+	}
+
+
+	
+@media (min-width: 1025px) {
+	.group-color {
+		visibility: visible;
+	}
+
+	.form-grid {
+		--gridCols: 2;
+		display: grid;
+		grid-template-columns: repeat(var(--gridCols), 1fr);
+		gap: 5rem;
+	}
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1024px) {
+	.group-color {
+		visibility: hidden;
+	}
+
+	.form-grid {
+		--gridCols: 2;
+		display: grid;
+		grid-template-columns: repeat(var(--gridCols), 1fr);
+		gap: 5px;
+	}
+}
 </style>

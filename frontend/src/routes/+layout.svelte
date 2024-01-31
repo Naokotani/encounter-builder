@@ -11,6 +11,7 @@
 </div>
 
 <style>
+
 	.layout {
 		padding: 1rem var(--containerPadding);
 		min-height: calc(100vh - var(--footerHeight));
