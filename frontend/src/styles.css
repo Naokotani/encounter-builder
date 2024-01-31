@@ -22,8 +22,11 @@
 	--anchorColor: var(--grey);
 	--buttonColor: var(--darkGrey);
 	--buttonText: var(--white);
+	--buttonHoverText: white;
 	--navColor: var(--lightGrey);
 	--linkHover: var(--black);
+	--modalText: var(--black);
+	--modalColor: var(--lightGrey);
 
   /*Styles*/
   --line: solid 2px var(--lineColor);
@@ -58,15 +61,18 @@
   --linkUnderline: var(--blue);
   --background: var(--black);
   --textColor: var(--white);
-  --lineColor: var(--purple);
+  --lineColor: var(--grey);
   --headerText: var(--white);
   --cardBg: var(--darkGrey);
   --cardText: var(--white);
 	--anchorColor: var(--lightGrey);
-	--buttonColor: var(--lightGrey);
-	--buttonText: var(--black);
+	--buttonColor: var(--white);
+	--buttonText: var(--grey);
+	--buttonHoverText: var(--black);
 	--navColor: var(--darkGrey);
 	--linkHover: var(--white);
+	--modalText: var(--white);
+	--modalColor: var(--darkGrey);
   }
 }
 
@@ -107,6 +113,17 @@ h5 {font-size: var(--h5);}
 
 small, .text_small {font-size: var(--smallText);}
 
+a:hover {
+	--lineColor: var(--linkHover);
+	border-bottom: solid 2px var(--lineColor);
+	color: var(--linkHover);
+}
+
+a {
+	text-decoration: none;
+	color: var(--anchorColor);
+}
+
 button {
   appearance: none;
   color: var(--buttonText);
@@ -115,11 +132,12 @@ button {
   padding: 5px 25px;
   box-shadow: var(--level-2);
   transition: 0.3s ease-in-out box-shadow;
+	cursor: pointer;
 }
 
 button:hover {
   box-shadow:var(--level-4);
-	color: var(--buttonHover);
+	color: var(--buttonHoverText);
 }
 
 button[disabled] {

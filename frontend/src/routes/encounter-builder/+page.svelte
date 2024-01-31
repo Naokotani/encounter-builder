@@ -1,5 +1,5 @@
 <script>
-	import { Monster,  } from '$lib';
+	import { Monster } from '$lib';
 	import Group from './group'
 	import Form from './Form.svelte'
 	import { PUBLIC_ENCOUNTER_API } from '$env/static/public';

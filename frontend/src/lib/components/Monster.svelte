@@ -38,12 +38,6 @@ XP: {budget}</p>
 		list-style: none;
 	}
 
-	h2:hover {
-		--lineColor: var(--linkUnderline);
-		border-bottom: solid 2px var(--lineColor);
-		color: var(--black);
-	}
-
 	.card-subheader {
 		font-size: var(--h5);
 		margin-top: 0.25rem;
@@ -57,9 +51,5 @@ XP: {budget}</p>
 		font-size: var(--h4);
 	}
 
-	a {
-		text-decoration: none;
-		color: var(--anchorColor);
-	}
 
 </style>

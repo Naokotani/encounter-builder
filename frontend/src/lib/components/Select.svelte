@@ -6,6 +6,7 @@
   export let label;
   export let selected = 0;
 	export let disabled = false;
+	export let handleBudgetChange;
 
 	onMount(() => {
 		if (options.length > 0) {
@@ -20,7 +21,7 @@
 
 <div class="grid aside-left">
 <label for={label}>{label}</label>
-<select disabled={disabled} bind:value={value} on:change={handleSelectChange}>
+<select disabled={disabled} bind:value={value} on:change={handleBudgetChange}>
   {#if options.length > 0}
     {#each options as option}
       <option value={option.value}>{option.label}</option>
@@ -42,9 +43,6 @@
 	}
 
 @media (min-width: 767px) {
-	.card {
-		max-width: 50%;
-	}
 	select {
 		width: 60%;
 	}

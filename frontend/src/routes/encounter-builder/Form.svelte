@@ -1,17 +1,11 @@
 <script>
-	import { Radio, Select } from '$lib';
+	import { Radio, Select, Modal } from '$lib';
   import { onMount } from 'svelte';
+	import Budget from './Budget.svelte'
 
 	export let formData;
 	export let submit;
 
-	let monsterBudget = [
-		{value: 'all', label: 'All'},
-		{value: 'more', label: 'Three Quarters'},
-		{value: 'even', label: 'Half'},
-		{value: 'less', label: 'One Quarter'},
-		{value: 'none', label: 'None'},
-	];
 
 	let lackeyBudget = [
 		{value: 'all', label: 'All'},
@@ -73,6 +67,87 @@
     }
   }
 
+	let monsterBudget = [
+		{value: 'all', label: 'All'},
+		{value: 'more', label: 'Three Quarters'},
+		{value: 'even', label: 'Half'},
+		{value: 'less', label: 'One Quarter'},
+		{value: 'none', label: 'None'},
+	];
+
+	let budget = 100;
+	let percentages = [0 ,100 , 0, 0]; // Example percentages for three groups
+	function handleBudgetChange() {
+		budget = 100;
+		if (formData.bbeg.budget === 'all') {
+			console.log(formData.bbeg.budget)
+			percentages[0] = 100;
+			budget -= 100;
+		} else if (formData.bbeg.budget === 'even') {
+			console.log(formData.bbeg.budget)
+			percentages[0] = 50;
+			budget -= 50;
+		} else if (formData.bbeg.budget === 'less') {
+			console.log(formData.bbeg.budget)
+			percentages[0] = 25;
+			budget -= 25;
+		} else if (formData.bbeg.budget === 'none') {
+			console.log(formData.bbeg.budget)
+			percentages[0] = 0;
+		} else if (formData.bbeg.budget === 'more') {
+			percentages[0] = 75;
+			budget -= 75;
+		}
+
+		console.log(budget)
+		if (formData.hench.budget === 'all') {
+			console.log(formData.hench.budget)
+			percentages[1] = budget;
+			budget = 0;
+		} else if (formData.hench.budget === 'even') {
+			console.log(formData.hench.budget)
+			percentages[1] = budget * 0.5;
+			budget -= budget * 0.5 
+		} else if (formData.hench.budget === 'less') {
+			console.log(formData.hench.budget)
+			percentages[1] = budget * 0.25;
+			budget -= budget * 0.25;
+		} else if (formData.hench.budget === 'none') {
+			console.log(formData.hench.budget)
+			percentages[1] = 0;
+		} else if (formData.hench.budget === 'more') {
+			percentages[1] = budget * 0.75;
+			budget -= budget * 0.75;
+		}
+
+		if (formData.lackey.budget === 'all') {
+			console.log(formData.lackey.budget)
+			percentages[2] = budget;
+			budget = 0;
+		} else if (formData.lackey.budget === 'even') {
+			console.log(formData.lackey.budget)
+			percentages[2] = budget * 0.5;
+			budget -= budget * 0.5 
+		} else if (formData.lackey.budget === 'less') {
+			console.log(formData.lackey.budget)
+			percentages[2] = budget * 0.25;
+			budget -= budget * 0.25;
+		} else if (formData.lackey.budget === 'none') {
+			console.log(formData.lackey.budget)
+			percentages[2] = 0;
+		} else if (formData.lackey.budget === 'more') {
+			percentages[2] = budget * 0.75;
+			budget -= budget * 0.75;
+		}
+
+		console.log(percentages[1]);
+
+
+
+
+		
+	}
+
 	let levels = []
 	for (let i = 1; i < 21; i++) {
 		levels.push({value: i.toString(), label: i.toString()});
@@ -100,19 +175,11 @@
 </script>
 <form class="grid"  on:submit|preventDefault={submit} style="width=30%;">
 	<div>
-
-		<h2>Monsters Options</h2>
-		<p  class="instructions ">
-			Pick the budget you want to assign to each monster type.
-			Setting a monster budget to 'all' will disable the monsters
-			below it. 'None' will remove that monster group from the
-			results. 'More', 'Half' and 'less' represents the amount of
-			remaining budget that will be used on that monster group.
-		</p>
 		<div>
-			<h3>Encounter Options</h3>
 			<div>
 				<div>
+					<h2>Encounter Options</h2>
+					<Modal />
 					<Select label="Party Level" options={levels} bind:value={formData.level}/>
 					<Select
 						label="Monster Types"
@@ -137,6 +204,7 @@
 		<h3>Big Bad Evil Guy</h3>
 		<p class="instructions">Solo monster up to 4 levels about the party depending on budget.</p>
 		<Select
+			handleBudgetChange={handleBudgetChange}
 			label="Solo Monster Budget"
 			options={monsterBudget}
 			bind:value={formData.bbeg.budget}/>
@@ -155,6 +223,7 @@
 			Aquatic?
 			<input type="checkbox" bind:checked={formData.bbeg.aquatic} />
 		</label>
+		<Budget percentages={percentages}/>
 	</div>
 	<div>
 		<h3>Henchmen</h3>
@@ -162,6 +231,7 @@
 			Group of monsters between party level and party level -2.
 		</p>
 		<Select
+			handleBudgetChange={handleBudgetChange}
 			label="Henchmen Budget"
 			bind:disabled={disabled}
 			options={monsterBudget}
@@ -187,10 +257,9 @@
 		<h3>Lackeys</h3>
 		<p class="instructions">
 			Group of weaker monsters that are party level -3 or -4.
-			Party must be at least level 2. To enable, neither Big
-			Bad Evil Guy nor Henchmen can be set to "all".
-		</p>
+			Party must be at least level 2.</p>
 		<Select
+			handleBudgetChange={handleBudgetChange}
 			label="Lackey Budget"
 			bind:disabled={disabledLackey}
 			options={lackeyBudget}
@@ -220,9 +289,7 @@
 		</small>
 		</div>
 	</div>
-
 </form>
-
 <style>
 	.instructions {
 		max-width: var(--formWidth);
