@@ -58,7 +58,7 @@
  --smallText: 0.8rem;
 }
 
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: dark) {
   :root {
 		/* dark mode intentions */
   --linkUnderline: var(--blue);
