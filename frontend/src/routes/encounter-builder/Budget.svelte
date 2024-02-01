@@ -55,9 +55,13 @@
 		transition: all .25s linear;
   }
 
+	h3 {
+		font-size: var(--h5);
+	}
+
 </style>
 
-<h5 class="budget-head">Xp budget</h5>
+<h3 class="budget-head">Xp budget</h3>
 <div class="budget-bar">
   {#each percentages as percentage, i}
     <div class="group{i+1} group" style="width: {percentage}%;"></div>
