@@ -17,13 +17,14 @@
   function handleSelectChange(event) {
     value = event.target.value;
   }
-	const labelSlug = label =>
-				str
+	const slugify = label =>
+				label
 				.toLowerCase()
 				.trim()
 				.replace(/[^\w\s-]/g, '')
 				.replace(/[\s_-]+/g, '-')
 				.replace(/^-+|-+$/g, '');
+	const labelSlug = slugify(label);
 
 </script>
 
