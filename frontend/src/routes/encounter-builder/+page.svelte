@@ -110,17 +110,26 @@
 	}
 
 	async function handleBbeg() {
-		await bbeg1.newGroup(formData, bbeg1.name);
+    const ranged = formData.bbeg.ranged;
+    const caster = formData.bbeg.caster;
+    const aquatic = formData.bbeg.aquatic;
+		await bbeg1.newGroup(formData, bbeg1.name, ranged, caster, aquatic);
 		bbeg1 = bbeg1;
 	}
 
 	async function handleHench() {
-		await hench1.newGroup(formData, hench1.name);
+    const ranged = formData.hench.ranged;
+    const caster = formData.hench.caster;
+    const aquatic = formData.hench.aquatic;
+		await hench1.newGroup(formData, hench1.name, ranged, caster, aquatic);
 		hench1 = hench1;
 	}
 
 	async function handleLackey() {
-		await lackey1.newGroup(formData, lackey1.name);
+    const ranged = formData.lackey.ranged;
+    const caster = formData.lackey.caster;
+    const aquatic = formData.lackey.aquatic;
+		await lackey1.newGroup(formData, lackey1.name, ranged, caster, aquatic);
 		lackey1 = lackey1;
 	}
 </script>

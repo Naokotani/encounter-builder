@@ -22,7 +22,7 @@ export default class Group {
 			this.budget_constant = budget;
 		}
 
-	async newGroup(formData, name) {
+	async newGroup(formData, name, ranged, caster, aquatic) {
 		const params = new URLSearchParams({
 			name: name,
 			level: this.level,
@@ -30,8 +30,9 @@ export default class Group {
 			number: this.number,
 			monster_types: formData.monster_types,
 			budget: this.budget_constant,
-			is_caster: formData.bbeg.caster.toLowerCase(),
-			is_ranged: formData.bbeg.ranged.toLowerCase(),
+			is_caster: caster,
+			is_ranged: ranged,
+			is_aquatic: aquatic,
 			bbeg: this.bbeg,
 		});
 

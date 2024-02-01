@@ -23,6 +23,7 @@ struct QueryParams {
     budget: i32,
     is_caster: String,
     is_ranged: String,
+    is_aquatic: bool,
     bbeg: bool,
 }
 
@@ -54,12 +55,13 @@ impl MonsterJson {
         let level_mod = query_params.level - query_params.party_level;
         let party_level = query_params.party_level;
         let budget = query_params.budget;
+        let is_aquatic = query_params.is_aquatic;
 
         let monster_group = encounter::MonsterGroup {
             number: query_params.number,
             is_ranged: encounter_api::parse_either_bool(is_ranged).unwrap(),
             is_caster: encounter_api::parse_either_bool(is_caster).unwrap(),
-            is_aquatic: false,
+            is_aquatic,
         };
 
         let monster_budget = if query_params.bbeg {
