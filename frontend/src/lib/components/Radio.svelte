@@ -22,7 +22,7 @@
 	const typeSlug = slugify(type);
 </script>
 <div role="radiogroup" class="flex radio-group" >
-	<label>{type}</label>
+	<span>{type}</span>
   {#each options as {value, label}}
 		<div class="radio">
 			<label for={`${sectionId}-${typeSlug}-${value}`}>
