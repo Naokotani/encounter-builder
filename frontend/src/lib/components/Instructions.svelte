@@ -9,7 +9,7 @@
 <p>
 	For each group, you can independently select whether you
 	would like the group to contain ranged or caster monsters,
-	select will give results for both. The more constraints are
-	applied the more likely the search will fail. If that
-	happens, remove some restraints and try again.
+	select 'Either' will give results for both. The more constraints
+	that are applied the more likely the search will fail. If that
+	happens, remove some constraints and try again.
 </p>
