@@ -29,8 +29,8 @@
 </script>
 
 <div >
-<label class="select-grid" for={label}>{label}
-	<select id={labelSlug} disabled={disabled} bind:value={value} on:change={handleBudgetChange}>
+<label class="select-grid" for={labelSlug}>{label}
+	<select id={labelSlug} name={labelSlug} disabled={disabled} bind:value={value} on:change={handleBudgetChange}>
 		{#if options.length > 0}
 			{#each options as option}
 				<option id={labelSlug+"-"+option.value} value={option.value}>{option.label}</option>

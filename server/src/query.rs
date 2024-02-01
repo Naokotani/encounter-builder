@@ -14,6 +14,7 @@ pub async fn query(
     params: &encounter::MonsterGroup,
     level: i32,
     pool: &PgPool,
+    name: Option<&String>
     ) -> Result<Option<monster::Monster>, Box<dyn std::error::Error>> {
         let mut builder: QueryBuilder<Postgres> = QueryBuilder::new(
             "
@@ -33,6 +34,11 @@ WHERE level = ",
         );
 
         builder.push_bind(level);
+
+        if let Some(name) = name {
+            builder.push("\nAND name != ");
+            builder.push_bind(name);
+        }
 
         match params.is_caster {
             EitherBool::True => {

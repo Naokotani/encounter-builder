@@ -1,9 +1,8 @@
-
 <script>
 	import { onMount } from 'svelte';
 	export let options;
   export let userSelected = 'either';
-	export let type;
+	export let type = "";
 	export let disabled = false;
 
 onMount(() => {
@@ -11,19 +10,27 @@ onMount(() => {
 	const ins = (Array.from(inputs));
 	userSelected = 'either'
 })
-</script>
 
+	const slugify = label =>
+				label
+				.toLowerCase()
+				.trim()
+				.replace(/[^\w\s-]/g, '')
+				.replace(/[\s_-]+/g, '-')
+				.replace(/^-+|-+$/g, '');
+	const typeSlug = slugify(type);
+</script>
 <div role="radiogroup" >
 	<label for={type + options[0].value}>{type}</label>
   {#each options as {value, label}}
 		<div>
-			
-    <label for={label}>{label}
+    <label for={`${label}+${typeSlug}`}>{label}
     <input
       class="sr-only"
 			disabled={disabled}
       type="radio"
-      id={label + type}
+			name={`${label}+${typeSlug}`}
+      id={`${label}+${typeSlug}`}
       bind:group={userSelected}
       value={value} />
 		</label>

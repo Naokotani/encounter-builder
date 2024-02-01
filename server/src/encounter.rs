@@ -117,6 +117,7 @@ impl Encounter {
                 &bbeg_params,
                 self.bbeg_level.unwrap(),
                 &pool,
+                None,
             )
             .await;
             match result {
@@ -146,6 +147,7 @@ impl Encounter {
                 &bbeg_params,
                 self.bbeg_level.unwrap(),
                 &pool,
+                None,
             )
             .await?
             {
@@ -171,6 +173,7 @@ impl Encounter {
                 &hench_params,
                 self.hench_level.unwrap(),
                 &pool,
+                None
             )
             .await;
             match result {
@@ -206,6 +209,7 @@ impl Encounter {
                 &hench_params,
                 self.hench_level.unwrap(),
                 &pool,
+                None
             )
             .await?
             {
@@ -232,6 +236,7 @@ impl Encounter {
                 &lackey_params,
                 self.lackey_level.unwrap(),
                 &pool,
+                None,
             )
             .await;
 
@@ -261,6 +266,7 @@ impl Encounter {
                 &lackey_params,
                 self.lackey_level.unwrap(),
                 &pool,
+                None,
             )
             .await?
             {

@@ -6,22 +6,32 @@
 	export let disabled = false;
 	export let sectionId = "";
 
-onMount(() => {
-  const inputs = document.querySelectorAll("input");
-	const ins = (Array.from(inputs));
-	userSelected = 'either'
-})
+	onMount(() => {
+		const inputs = document.querySelectorAll("input");
+		const ins = (Array.from(inputs));
+		userSelected = 'either'
+	})
+
+	const slugify = label =>
+				label
+				.toLowerCase()
+				.trim()
+				.replace(/[^\w\s-]/g, '')
+				.replace(/[\s_-]+/g, '-')
+				.replace(/^-+|-+$/g, '');
+	const typeSlug = slugify(type);
 </script>
 <div role="radiogroup" class="flex radio-group" >
-	<label for={type + options[0].value}>{type}</label>
+	<label>{type}</label>
   {#each options as {value, label}}
 		<div class="radio">
-			<label for={label}>
+			<label for={`${sectionId}-${typeSlug}-${value}`}>
 				<input
 					class="sr-only"
 					disabled={disabled}
+					name={`${sectionId}-${typeSlug}-${value}`}
 					type="radio"
-					id={`${sectionId}-${label}-${type}`}
+					id={`${sectionId}-${typeSlug}-${value}`}
 					bind:group={userSelected}
 					value={value} />
 				{label}</label>

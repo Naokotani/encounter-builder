@@ -15,6 +15,7 @@ async fn get_monster(query_params: web::Query<QueryParams>) -> impl Responder {
 
 #[derive(Deserialize, Debug)]
 struct QueryParams {
+    name: String,
     level: i32,
     party_level: i32,
     number: i32,
@@ -78,15 +79,14 @@ impl MonsterJson {
         println!("{}", query_params.number);
         println!("level: {}", query_params.level);
         println!("{}", query_params.budget);
-
-
         println!("{:?}", monster_budget);
+
         let monster_types: Vec<String> = query_params
             .monster_types
             .split(',')
             .map(|v| v.to_string())
             .collect();
-        let monster = query::query(&monster_types, &monster_group,  monster_budget.level, &pool).await;
+        let monster = query::query(&monster_types, &monster_group,  monster_budget.level, &pool, Some(&query_params.name)).await;
 
         let monster = match monster {
             Ok(m) => m,

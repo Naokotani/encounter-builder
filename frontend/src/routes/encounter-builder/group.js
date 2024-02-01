@@ -22,8 +22,9 @@ export default class Group {
 			this.budget_constant = budget;
 		}
 
-	async newGroup(formData) {
+	async newGroup(formData, name) {
 		const params = new URLSearchParams({
+			name: name,
 			level: this.level,
 			party_level: formData.level,
 			number: this.number,

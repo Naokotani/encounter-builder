@@ -110,17 +110,17 @@
 	}
 
 	async function handleBbeg() {
-		await bbeg1.newGroup(formData);
+		await bbeg1.newGroup(formData, bbeg1.name);
 		bbeg1 = bbeg1;
 	}
 
 	async function handleHench() {
-		await hench1.newGroup(formData);
+		await hench1.newGroup(formData, hench1.name);
 		hench1 = hench1;
 	}
 
 	async function handleLackey() {
-		await lackey1.newGroup(formData);
+		await lackey1.newGroup(formData, lackey1.name);
 		lackey1 = lackey1;
 	}
 </script>
