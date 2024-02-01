@@ -64,6 +64,7 @@ WHERE level = ",
 
         let mut added_type = false;
         for t in monster_types {
+            println!("{}", t);
             if !added_type {
                 builder.push("\nAND (monster_type = ");
                 builder.push_bind(t);
@@ -83,6 +84,7 @@ WHERE level = ",
         let mut query = builder.build();
         let arguments = query.take_arguments().unwrap();
         let sql = query.sql();
+        println!("{}", sql);
 
         let mut monster_data = sqlx::query_with(sql, arguments)
         .map(|row: PgRow|
