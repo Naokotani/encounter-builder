@@ -16,7 +16,7 @@ onMount(() => {
 	<label for={type + options[0].value}>{type}</label>
   {#each options as {value, label}}
 		<div class="radio">
-				
+			<label for={label}>
 				<input
 					class="sr-only"
 					disabled={disabled}
@@ -24,7 +24,7 @@ onMount(() => {
 					id={label + type}
 					bind:group={userSelected}
 					value={value} />
-			<label for={label}>{label}</label>
+				{label}</label>
 		</div>
   {/each}
 </div>

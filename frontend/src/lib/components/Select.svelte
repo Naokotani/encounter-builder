@@ -20,17 +20,18 @@
 
 </script>
 
-<div class="select-grid aside-left">
-<label for={label}>{label}</label>
-<select disabled={disabled} bind:value={value} on:change={handleBudgetChange}>
-  {#if options.length > 0}
-    {#each options as option}
-      <option value={option.value}>{option.label}</option>
-    {/each}
-  {:else}
-    <option value="">No options available</option>
-  {/if}
-</select>
+<div >
+<label class="select-grid" for={label}>{label}
+	<select disabled={disabled} bind:value={value} on:change={handleBudgetChange}>
+		{#if options.length > 0}
+			{#each options as option}
+				<option value={option.value}>{option.label}</option>
+			{/each}
+		{:else}
+			<option value="">No options available</option>
+		{/if}
+	</select>
+</label>
 </div>
 
 <style>
@@ -49,6 +50,12 @@
 		width: 30%;
 		max-height: 2rem;
 		margin-bottom: 5px;
+		display: inline;
+
+	}
+
+	label {
+		display: flex;
 	}
 
 @media (min-width: 767px) {

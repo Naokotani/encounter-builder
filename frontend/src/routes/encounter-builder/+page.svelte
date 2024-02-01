@@ -124,6 +124,17 @@
 		lackey1 = lackey1;
 	}
 </script>
+<svelte:head>
+	<title>PF2e Encounter Builder</title>
+	<meta
+		name="description"
+		content=
+		"
+		 An encounter builder for Pathfinder Second Edition.
+		 The builder takes imports from users and aims to create
+		 properly balanced encounters for different difficulties.
+		 " />
+</svelte:head>
 <div class="form-grid">
 	<div class="form">
 		<Form formData={formData} submit={handleSubmit} />
