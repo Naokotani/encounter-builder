@@ -4,6 +4,7 @@
   export let userSelected = 'either';
 	export let type;
 	export let disabled = false;
+	export let sectionId = "";
 
 onMount(() => {
   const inputs = document.querySelectorAll("input");
@@ -11,7 +12,6 @@ onMount(() => {
 	userSelected = 'either'
 })
 </script>
-
 <div role="radiogroup" class="flex radio-group" >
 	<label for={type + options[0].value}>{type}</label>
   {#each options as {value, label}}
@@ -21,14 +21,13 @@ onMount(() => {
 					class="sr-only"
 					disabled={disabled}
 					type="radio"
-					id={label + type}
+					id={`${sectionId}-${label}-${type}`}
 					bind:group={userSelected}
 					value={value} />
 				{label}</label>
 		</div>
   {/each}
 </div>
-
 <style>
 	.radio-group>label {
 		padding-left: 2rem;

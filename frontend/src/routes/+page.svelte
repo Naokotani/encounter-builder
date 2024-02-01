@@ -2,6 +2,7 @@
 </script>
 <svelte:head>
 	<title>Alembic Head</title>
+	<meta name="theme-color" content="#141414"/>
 	<meta
 		name="description"
 		content=

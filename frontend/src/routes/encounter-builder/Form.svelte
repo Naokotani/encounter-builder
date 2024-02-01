@@ -164,17 +164,19 @@
 		<br/>
 		<div class="radio-grid">
 			<Radio
+				sectionId="solo"
 				options={eitherBools}
 				type="Ranged?"
 				bind:userSelected={formData.bbeg.ranged}/>
 			<Radio
+				sectionId="solo"
 				options={eitherBools}
 				type="Caster?"
 				bind:userSelected={formData.bbeg.caster}/>
 		</div>
 		<label>
 			Aquatic?
-			<input type="checkbox" bind:checked={formData.bbeg.aquatic} />
+			<input type="checkbox" id="solo-aquatic" bind:checked={formData.bbeg.aquatic} />
 		</label>
 		<Budget percentages={percentages}/>
 	</div>
@@ -194,17 +196,19 @@
 			<Radio
 				options={eitherBools}
 				type="Ranged?"
+				sectionId="hench"
 				bind:disabled={disabled}
 				bind:userSelected={formData.hench.ranged}/>
 			<Radio
 				options={eitherBools}
+				sectionId="hench"
 				type="Caster?"
 				bind:disabled={disabled}
 				bind:userSelected={formData.hench.caster}/>
 		</div>
 		<label>
 			Aquatic?
-			<input type="checkbox" bind:checked={formData.hench.aquatic} />
+			<input type="checkbox" id="hench-aquatic" bind:checked={formData.hench.aquatic} />
 		</label>
 		<h3>Lackeys<div class="group-color lackey-color"></div></h3>
 		<p class="instructions">
@@ -219,18 +223,20 @@
 		<div class="radio-grid">
 			<Radio
 				options={eitherBools}
+				sectionId="lackey"
 				bind:disabled={disabledLackey}
 				type="Ranged?"
 				bind:userSelected={formData.lackey.ranged}/>
 			<Radio
 				options={eitherBools}
+				sectionId="lackey"
 				bind:disabled={disabledLackey}
 				type="Caster?"
 				bind:userSelected={formData.lackey.caster}/>
 		</div>
 		<label>
 			Aquatic?
-			<input type="checkbox" bind:checked={formData.lackey.aquatic} />
+			<input type="checkbox" id="lackey-aquatic" bind:checked={formData.lackey.aquatic} />
 		</label>
 		<br/>
 		<div>

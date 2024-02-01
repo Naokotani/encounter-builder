@@ -17,15 +17,22 @@
   function handleSelectChange(event) {
     value = event.target.value;
   }
+	const labelSlug = label =>
+				str
+				.toLowerCase()
+				.trim()
+				.replace(/[^\w\s-]/g, '')
+				.replace(/[\s_-]+/g, '-')
+				.replace(/^-+|-+$/g, '');
 
 </script>
 
 <div >
 <label class="select-grid" for={label}>{label}
-	<select disabled={disabled} bind:value={value} on:change={handleBudgetChange}>
+	<select id={labelSlug} disabled={disabled} bind:value={value} on:change={handleBudgetChange}>
 		{#if options.length > 0}
 			{#each options as option}
-				<option value={option.value}>{option.label}</option>
+				<option id={labelSlug+"-"+option.value} value={option.value}>{option.label}</option>
 			{/each}
 		{:else}
 			<option value="">No options available</option>
