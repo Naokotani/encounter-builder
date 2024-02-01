@@ -10,7 +10,7 @@
 
 	let bbegData = {
 		budget: 'all',
-		aquatic: null,
+		aquatic: false,
 		caster: 'either',
 		ranged: 'either',
 		type: null,
@@ -18,7 +18,7 @@
 
 	let henchData = {
 		budget: 'all',
-		aquatic: null,
+		aquatic: false,
 		caster: 'either',
 		ranged: 'either',
 		type: null,
@@ -26,7 +26,7 @@
 
 	let lackeyData = {
 		budget: 'all',
-		aquatic: null,
+		aquatic: false,
 		caster: 'either',
 		ranged: 'either',
 		type: null,
@@ -52,21 +52,21 @@
 			party_size: formData.party_size,
 			difficulty: formData.difficulty,
 			monster_types: [formData.monster_types],
-			bbeg_url: formData.bbeg_url,
 			bbeg_budget: formData.bbeg.budget,
 			bbeg_caster: formData.bbeg.caster.toLowerCase(),
 			bbeg_ranged: formData.bbeg.ranged.toLowerCase(),
-			hench_url: formData.bbeg_url,
+			bbeg_aquatic: formData.bbeg.aquatic,
 			hench_budget: formData.hench.budget,
 			hench_caster: formData.hench.caster.toLowerCase(),
 			hench_ranged: formData.hench.ranged.toLowerCase(),
-			lackey_url: formData.lackey_url,
+			hench_aquatic: formData.hench.aquatic,
 			lackey_budget: formData.lackey.budget,
 			lackey_caster: formData.lackey.caster.toLowerCase(),
 			lackey_ranged: formData.lackey.ranged.toLowerCase(),
+			lackey_aquatic: formData.lackey.aquatic,
 		});
 
-		const response = await fetch(`${PUBLIC_ENCOUNTER_API}${params.toString()}`);
+		const response = await fetch(`${PUBLIC_ENCOUNTER_API}?${params.toString()}`);
 		const monster = await response.json();
 
 		const bbegData = {

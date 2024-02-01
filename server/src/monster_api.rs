@@ -59,6 +59,7 @@ impl MonsterJson {
             number: query_params.number,
             is_ranged: encounter_api::parse_either_bool(is_ranged).unwrap(),
             is_caster: encounter_api::parse_either_bool(is_caster).unwrap(),
+            is_aquatic: false,
         };
 
         let monster_budget = if query_params.bbeg {

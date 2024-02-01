@@ -22,12 +22,15 @@ struct QueryParams {
     bbeg_budget: String,
     bbeg_caster: String,
     bbeg_ranged: String,
+    bbeg_aquatic: bool,
     hench_budget: String,
     hench_caster: String,
     hench_ranged: String,
+    hench_aquatic: bool,
     lackey_budget: String,
     lackey_caster: String,
     lackey_ranged: String,
+    lackey_aquatic: bool,
 }
 
 #[derive(Serialize)]
@@ -93,7 +96,6 @@ impl EncounterJson {
         for monster in &monsters {
             println!("{}", monster);
         }
-
         let lackey_level = encounter.lackey_level.unwrap_or(encounter.level - 3);
         let (lackey, monsters) = get_monster(&encounter.lackey_status, lackey_level, monsters);
 
@@ -202,12 +204,15 @@ async fn get_data(
         bbeg_status: encounter::FillStatus::Pending,
         bbeg_caster,
         bbeg_ranged,
+        bbeg_aquatic: query_params.bbeg_aquatic,
         hench_status: encounter::FillStatus::Pending,
         hench_caster,
         hench_ranged,
+        hench_aquatic: query_params.hench_aquatic,
         lackey_status: encounter::FillStatus::Pending,
         lackey_caster,
         lackey_ranged,
+        lackey_aquatic: query_params.lackey_aquatic,
     };
 
     let monsters = encounter.create().await?;

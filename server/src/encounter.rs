@@ -23,12 +23,15 @@ pub struct Encounter {
     pub bbeg_status: FillStatus,
     pub bbeg_caster: EitherBool,
     pub bbeg_ranged: EitherBool,
+    pub bbeg_aquatic: bool,
     pub hench_status: FillStatus,
     pub hench_caster: EitherBool,
     pub hench_ranged: EitherBool,
+    pub hench_aquatic: bool,
     pub lackey_status: FillStatus,
     pub lackey_caster: EitherBool,
     pub lackey_ranged: EitherBool,
+    pub lackey_aquatic: bool,
 }
 
 
@@ -90,6 +93,7 @@ pub struct MonsterGroup {
     pub number: i32,
     pub is_ranged: EitherBool,
     pub is_caster: EitherBool,
+    pub is_aquatic: bool,
 }
 
 impl Encounter {
@@ -329,6 +333,7 @@ impl Encounter {
             number: 1,
             is_caster: self.bbeg_caster.clone(),
             is_ranged: self.bbeg_ranged.clone(),
+            is_aquatic: self.bbeg_aquatic,
         }
     }
 
@@ -361,6 +366,7 @@ impl Encounter {
             number: henchman_number,
             is_ranged: self.hench_ranged.clone(),
             is_caster: self.hench_caster.clone(),
+            is_aquatic: self.hench_aquatic,
         }
     }
 
@@ -379,6 +385,7 @@ impl Encounter {
             number: lackey_number,
             is_ranged: self.lackey_ranged.clone(),
             is_caster: self.lackey_caster.clone(),
+            is_aquatic: self.lackey_aquatic,
         }
     }
 
