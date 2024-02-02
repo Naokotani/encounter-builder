@@ -66,7 +66,7 @@
 			lackey_aquatic: formData.lackey.aquatic,
 		});
 
-		const response = await fetch(`${PUBLIC_ENCOUNTER_API}?${params.toString()}`);
+		const response = await fetch(`${PUBLIC_ENCOUNTER_API}${params.toString()}`);
 		const monster = await response.json();
 
 		const bbegData = {
