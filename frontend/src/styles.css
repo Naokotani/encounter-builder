@@ -1,8 +1,7 @@
-@import url('https://fonts.googleapis.com/css?family=Space+Mono:400|Mulish:400|UnifrakturMaguntia:400');
+@import url('https://fonts.googleapis.com/css?family=Space+Mono:400|Mulish:400|UnifrakturMaguntia:400&display=swap');
 
 :root {
   /*Light mode pallette*/
-
   --white: #fefefe;
   --lightGrey: #bfbfbf;
   --grey: #404040;

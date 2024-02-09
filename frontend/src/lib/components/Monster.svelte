@@ -1,5 +1,4 @@
 <script>
-	export let title;
 	export let url;
 	export let budget;
 	export let name;
@@ -48,10 +47,5 @@
 		margin-bottom: 0;
 		line-height: var(--h5);
 
-	}
-
-	h3 {
-		margin: 0;
-		font-size: var(--h4);
 	}
 </style>

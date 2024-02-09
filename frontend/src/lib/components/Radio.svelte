@@ -39,9 +39,6 @@
   {/each}
 </div>
 <style>
-	.radio-group>label {
-		padding-left: 2rem;
-	}
 	.radio {
 		padding-right: 40%;
 	}
