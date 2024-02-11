@@ -624,6 +624,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "encounter-builder-api"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "clap",
+ "dotenv",
+ "env_logger",
+ "log",
+ "rand",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+]
+
+[[package]]
 name = "env_filter"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1493,22 +1509,6 @@ dependencies = [
  "itoa",
  "ryu",
  "serde",
-]
-
-[[package]]
-name = "server"
-version = "0.1.0"
-dependencies = [
- "actix-web",
- "clap",
- "dotenv",
- "env_logger",
- "log",
- "rand",
- "serde",
- "serde_json",
- "sqlx",
- "tokio",
 ]
 
 [[package]]

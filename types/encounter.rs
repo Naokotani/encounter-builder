@@ -1,6 +1,6 @@
-use crate::monster;
+use crate::types::monster;
 use std::fmt;
-use crate::query;
+use crate::handlers::query;
 use rand::Rng;
 use serde::Deserialize;
 use sqlx::postgres::PgPoolOptions;

@@ -1,6 +1,6 @@
-use crate::encounter;
-use crate::error;
-use crate::monster;
+use crate::types::encounter;
+use crate::types::error;
+use crate::types::monster;
 use actix_web::{
     body::BoxBody, get, http::header::ContentType, web, HttpRequest, HttpResponse, Responder,
     Result,

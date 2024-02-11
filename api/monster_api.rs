@@ -1,6 +1,6 @@
-use crate::encounter;
+use crate::types::encounter;
 use crate::encounter_api;
-use crate::query;
+use crate::handlers::query;
 use actix_web::{
     body::BoxBody, get, http::header::ContentType, web, HttpRequest, HttpResponse, Responder
 };

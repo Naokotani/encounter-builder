@@ -1,6 +1,6 @@
-use crate::encounter;
-use crate::encounter::EitherBool;
-use crate::monster;
+use crate::types::encounter;
+use crate::types::encounter::EitherBool;
+use crate::types::monster;
 use rand::Rng;
 use sqlx::postgres::PgRow;
 use sqlx::Execute;

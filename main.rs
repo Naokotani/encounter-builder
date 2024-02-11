@@ -1,23 +1,28 @@
-use actix_web::{post, web, App, HttpResponse, HttpServer, Responder, middleware};
+use actix_web::{post, App, HttpResponse, HttpServer, Responder, middleware};
 use dotenv::dotenv;
-mod monster;
-mod encounter;
-mod encounter_api;
-mod monster_api;
-mod error;
-mod query;
+use crate::api::monster_api;
+use crate::api::encounter_api;
+
+mod types {
+    pub mod monster;
+    pub mod encounter;
+    pub mod error;
+}
+mod api {
+    pub mod encounter_api;
+    pub mod monster_api;
+    
+}
+
+mod handlers {
+    pub mod query;
+}
 
 
 #[post("/echo")]
 async fn echo(req_body: String) -> impl Responder {
     HttpResponse::Ok().body(req_body)
 }
-
-
-async fn manual_hello() -> impl Responder {
-    HttpResponse::Ok().body("Hey there!")
-}
-
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -29,7 +34,6 @@ async fn main() -> std::io::Result<()> {
             .service(encounter_api::get_encounter)
             .service(monster_api::get_monster)
             .service(echo)
-            .route("/hey", web::get().to(manual_hello))
     })
     .bind(("127.0.0.1", 8081))?
     .run()
