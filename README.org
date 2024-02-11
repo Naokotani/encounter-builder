@@ -8,7 +8,7 @@ A Rust  and Svelte  web application that uses a rust API and a svelte front-end.
 This application is designed to be run on a VPS behind a reverse proxy, such as Nginx. Nginx is used for managing traffic and caching for the front-end. The front-end is designed to be interacted with via an HTML form handled by the Svelte front end, which is currently located at [[https://alembichead.com/encounter-builder]].
 
 * Building 
-The Rust binaries are built with =cargo build --production=. The necessary environment variables must be placed in a =.env= file in the format ~DATABASE_URL=postgres://user:password@localhost/db_name~. Currently the database tables must be built manually using the psql repl and are populated by [[https://github.com/Naokotani/encouter-builder-scraper][this]] web scraper. The front-end is built with =npm run build= and requires a =.env= file that contains the two API routes such as:
+The Rust binaries are built with =cargo build --release=. The necessary environment variables must be placed in a =.env= file in the format ~DATABASE_URL=postgres://user:password@localhost/db_name~. Currently the database tables must be built manually using the psql repl and are populated by [[https://github.com/Naokotani/encouter-builder-scraper][this]] web scraper. The front-end is built with =npm run build= and requires a =.env= file that contains the two API routes such as:
 
 ~PUBLIC_MONSTER_API=https://alembichead.com/monster?~
 ~PUBLIC_ENCOUNTER_API=https://alembichead.com/encounter?~
