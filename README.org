@@ -1,3 +1,19 @@
 #+title: Pathfinder Encounter Generator
 
+* Introduction
+
 A Rust  and Svelte  web application that uses a rust API and a svelte front-end. The web application is designed to dynamically create encounters for a popular table top roll playing game called Pathfinder 2e. Using an HTML form on the front-end, users are able to configure their search constraints and then fetch sends a query to the Rust API. The rust back-end calculates the encounter budget and other query parameters which is then used to query a PostgreSQL database and send it as JSON back to the client. Additionally, to get the dataset, I built a web scraper in Rust to obtain and build the SQL database from an open source document.
+
+* Usage 
+This application is designed to be run on a VPS behind a reverse proxy, such as Nginx. Nginx is used for managing traffic and caching for the front-end. The front-end is designed to be interacted with via an HTML form handled by the Svelte front end, which is currently located at [[https://alembichead.com/encounter-builder]].
+
+* Building 
+The Rust binaries are built with =cargo build --production=. The necessary environment variables must be placed in a =.env= file in the format ~DATABASE_URL=postgres://user:password@localhost/db_name~. Currently the database tables must be built manually using the psql repl and are populated by [[https://github.com/Naokotani/encouter-builder-scraper][this]] web scraper. The front-end is built with =npm run build= and requires a =.env= file that contains the two API routes such as:
+
+~PUBLIC_MONSTER_API=https://alembichead.com/monster?~
+~PUBLIC_ENCOUNTER_API=https://alembichead.com/encounter?~
+
+The variables must begin =PUBLIC_= in order to conform to the Sveltekit requirements for public facing environmental variables.
+
+* Running
+The web scraper is designed to be run on the on the command line with no arguments. The front-end Node precess should be managed by pm2 and the rust backed process is designed to be managed  as a service by systemd. 
