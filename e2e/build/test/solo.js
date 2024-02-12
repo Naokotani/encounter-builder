@@ -39,6 +39,9 @@ function soloTest(difficulty) {
                             console.log(data.hench_name);
                             assert.equal(data.hench_status, "Filled");
                             assert.notEqual(data.hench_name, "Failed To find Monster");
+                            assert.ok(data.hench_level === i ||
+                                data.hench_level === i - 1 ||
+                                data.hench_level === i - 2, `Monster level: ${data.hench_level}`);
                         }
                     });
                 });
@@ -56,6 +59,8 @@ function soloTest(difficulty) {
                             else {
                                 assert.equal(data.lackey_status, "Filled");
                                 assert.notEqual(data.lackey_name, "Failed To find Monster");
+                                assert.ok(data.lackey_level === i - 3 ||
+                                    data.lackey_level === i - 4, `Monster level: ${data.hench_level}`);
                             }
                         }
                     });
