@@ -3,7 +3,6 @@ import formData from './formData.js';
 import Data from './Data.js'
 import emptyData from './emptyData.js'
 
-
 export default async (level: number, difficulty: string) => {
 	const {page, browser} = await configurePage(level);
 
