@@ -1,4 +1,5 @@
 export default interface Data {
+	id: string,
 	budget: number,
   bbeg_budget: number,
   bbeg_url: string,

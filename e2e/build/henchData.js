@@ -10,12 +10,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import configurePage from './configurePage.js';
 import formData from './formData.js';
 import emptyData from './emptyData.js';
-export default (level, difficulty) => __awaiter(void 0, void 0, void 0, function* () {
+export default (level, difficulty, url) => __awaiter(void 0, void 0, void 0, function* () {
     const { page, browser } = yield configurePage(level);
     yield page.select('#difficulty', difficulty);
     yield page.select('#solo-monster-budget', "none");
     yield page.select('#henchmen-budget', "all");
-    const res = yield formData(page);
+    const res = yield formData(page, url);
     let data;
     if (res) {
         data = res;

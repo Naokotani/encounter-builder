@@ -10,13 +10,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import bbegData from './henchData.js';
 import henchData from './henchData.js';
 import lackeyData from './lackeyData.js';
+import 'dotenv/config';
+const API_URL = process.env.API_URL;
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        const bbeg = yield bbegData(1, 'moderate');
+        const bbeg = yield bbegData(1, 'moderate', API_URL);
         console.log(bbeg);
-        const hench = yield henchData(1, 'moderate');
+        const hench = yield henchData(1, 'moderate', API_URL);
         console.log(hench);
-        const lackey = yield lackeyData(1, 'moderate');
+        const lackey = yield lackeyData(1, 'moderate', API_URL);
         console.log(lackey);
     });
 }

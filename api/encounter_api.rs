@@ -1,16 +1,23 @@
 use crate::types::encounter;
 use crate::types::error;
+use crate::types::error::EnumError;
 use crate::types::monster;
 use actix_web::{
     body::BoxBody, get, http::header::ContentType, web, HttpRequest, HttpResponse, Responder,
-    Result,
 };
 use serde::Deserialize;
 use serde::Serialize;
+use anyhow::Result;
+use uuid::Uuid;
+
 
 #[get("/encounter")]
-async fn get_encounter(query_params: web::Query<QueryParams>) -> impl Responder {
-    EncounterJson::new(query_params).await
+async fn get_encounter(query_params: web::Query<QueryParams>) -> HttpResponse {
+    let encounter_json = EncounterJson::new(query_params).await;
+    match encounter_json {
+        Ok(json) => HttpResponse::Ok().json(json),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string())
+    }
 }
 
 #[derive(Deserialize, Debug)]
@@ -33,8 +40,10 @@ struct QueryParams {
     lackey_aquatic: bool,
 }
 
+#[derive(Debug)]
 #[derive(Serialize)]
 struct EncounterJson {
+    id: String,
     budget: f32,
 
     bbeg_budget: f32,
@@ -78,18 +87,25 @@ impl Responder for EncounterJson {
     type Body = BoxBody;
 
     fn respond_to(self, _req: &HttpRequest) -> HttpResponse<Self::Body> {
-        let body = serde_json::to_string(&self).unwrap();
-
-        HttpResponse::Ok()
-            .content_type(ContentType::json())
-            .body(body)
+        match serde_json::to_string(&self) {
+            Ok(body) => {
+                HttpResponse::Ok()
+                    .content_type(ContentType::json())
+                    .body(body)
+            },
+            Err(e) => {
+                let error = format!("Failed to serialize json {}", e);
+                HttpResponse::NotFound()
+                .content_type(ContentType::json()).body(error)
+            } 
+        }
     }
 }
 
 impl EncounterJson {
-    async fn new(query_params: web::Query<QueryParams>) -> Self {
+    async fn new(query_params: web::Query<QueryParams>) -> Result<Self, Box<dyn std::error::Error>> {
         let data = get_data(query_params).await;
-        let (monsters, encounter) = data.unwrap();
+        let (monsters, encounter) = data?;
 
         println!("{}", encounter);
 
@@ -97,19 +113,24 @@ impl EncounterJson {
             println!("{}", monster);
         }
         let lackey_level = encounter.lackey_level.unwrap_or(encounter.level - 3);
-        let (lackey, monsters) = get_monster(&encounter.lackey_status, lackey_level, monsters);
+        let (lackey, monsters) = get_monster(&encounter.lackey_status, lackey_level, monsters)?;
+        
 
         let hench_level = encounter.hench_level.unwrap_or(encounter.level);
-        let (henchmen, monsters) = get_monster(&encounter.hench_status, hench_level, monsters);
+        let (henchmen, monsters) = get_monster(&encounter.hench_status, hench_level, monsters)?;
 
         let bbeg_level = encounter.bbeg_level.unwrap_or(0);
-        let (bbeg, _) = get_monster(&encounter.bbeg_status, bbeg_level, monsters);
+        let (bbeg, _) = get_monster(&encounter.bbeg_status, bbeg_level, monsters)?;
 
         let bbeg_status = parse_status(encounter.bbeg_status);
         let hench_status = parse_status(encounter.hench_status);
         let lackey_status = parse_status(encounter.lackey_status);
 
-        EncounterJson {
+        let id = Uuid::new_v4();
+        println!("encounter id {}",id);
+
+        Ok(EncounterJson {
+            id: id.to_string(),
             budget: encounter.budget,
 
             bbeg_budget: encounter.bbeg_budget,
@@ -147,9 +168,8 @@ impl EncounterJson {
             lackey_is_caster: lackey.is_caster,
             lackey_is_ranged: lackey.is_ranged,
             lackey_status,
-        }
+        })
     }
-
 }
 
 async fn get_data(
@@ -162,8 +182,8 @@ async fn get_data(
         "severe" => encounter::EncounterBudget::Severe,
         "extreme" => encounter::EncounterBudget::Extreme,
         _ => {
-            return Err(Box::new(error::QueryError(String::from(
-                "Bad difficulty string",
+            return Err(Box::new(EnumError::Difficulty(String::from(
+                &query_params.difficulty,
             ))))
         }
     };
@@ -174,17 +194,17 @@ async fn get_data(
         .map(|v| v.to_string())
         .collect();
 
-    let bbeg_caster = parse_either_bool(&query_params.bbeg_caster).unwrap();
-    let bbeg_ranged = parse_either_bool(&query_params.bbeg_ranged).unwrap();
-    let hench_caster = parse_either_bool(&query_params.hench_caster).unwrap();
-    let hench_ranged = parse_either_bool(&query_params.hench_ranged).unwrap();
-    let lackey_caster = parse_either_bool(&query_params.lackey_caster).unwrap();
-    let lackey_ranged = parse_either_bool(&query_params.lackey_ranged).unwrap();
+    let bbeg_caster = parse_either_bool(&query_params.bbeg_caster)?;
+    let bbeg_ranged = parse_either_bool(&query_params.bbeg_ranged)?;
+    let hench_caster = parse_either_bool(&query_params.hench_caster)?;
+    let hench_ranged = parse_either_bool(&query_params.hench_ranged)?;
+    let lackey_caster = parse_either_bool(&query_params.lackey_caster)?;
+    let lackey_ranged = parse_either_bool(&query_params.lackey_ranged)?;
 
     let configuration = encounter::Configuration {
-        bbeg: parse_budget(&query_params.bbeg_budget).unwrap(),
-        henchman: parse_budget(&query_params.hench_budget).unwrap(),
-        lackey: parse_budget(&query_params.lackey_budget).unwrap(),
+        bbeg: parse_budget(&query_params.bbeg_budget)?,
+        henchman: parse_budget(&query_params.hench_budget)?,
+        lackey: parse_budget(&query_params.lackey_budget)?,
     };
 
     let mut encounter = encounter::Encounter {
@@ -227,9 +247,8 @@ pub fn parse_either_bool(
         "true" => encounter::EitherBool::True,
         "false" => encounter::EitherBool::False,
         _ => {
-            return Err(Box::new(error::QueryError(format!(
-                "Bad bool string: {}",
-                bool_str
+            return Err(Box::new(EnumError::EitherBool(String::from(
+                bool_str,
             ))))
         }
     };
@@ -253,18 +272,25 @@ fn parse_budget(budget: &str) -> Result<encounter::ConfigWeight, Box<dyn std::er
         "all" => encounter::ConfigWeight::All,
         "none" => encounter::ConfigWeight::None,
         _ => {
-            return Err(Box::new(error::QueryError(format!(
-                "Bad budget string: {}",
-                budget
+            return Err(Box::new(EnumError::ConfigWeight(String::from(
+                budget,
             ))))
         }
     };
     Ok(config_weight)
 }
 
-fn get_monster(status: &encounter::FillStatus, level: i32, mut monsters:Vec<monster::Monster>) -> (monster::Monster, Vec<monster::Monster>) {
+fn get_monster(
+    status: &encounter::FillStatus,
+    level: i32,
+    mut monsters: Vec<monster::Monster>,
+) -> Result<(monster::Monster, Vec<monster::Monster>), Box<dyn std::error::Error>> {
+
     let monster = if status == &encounter::FillStatus::Filled {
-        monsters.pop().unwrap()
+        match monsters.pop() {
+            Some(m) => m,
+            None => return Err(Box::new(error::VecError::EmptyMonster(level)))
+        }
     } else {
         monster::Monster {
             creature_id: 0,
@@ -281,5 +307,5 @@ fn get_monster(status: &encounter::FillStatus, level: i32, mut monsters:Vec<mons
             is_ranged: false,
         }
     };
-    (monster, monsters)
+   Ok((monster, monsters))
 }

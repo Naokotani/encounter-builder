@@ -7,11 +7,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-export default (page) => __awaiter(void 0, void 0, void 0, function* () {
+export default (page, url) => __awaiter(void 0, void 0, void 0, function* () {
     let data;
     page.on('response', (response) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            if (response.url().startsWith('https://alembichead.com/encounter?')) {
+            if (response.url().startsWith(`${url}encounter?`)) {
                 const responseData = yield response.json();
                 data = responseData;
             }
@@ -27,7 +27,8 @@ export default (page) => __awaiter(void 0, void 0, void 0, function* () {
     yield page.waitForSelector(searchResultSelector);
     yield page.click(searchResultSelector);
     yield page.waitForResponse((response) => __awaiter(void 0, void 0, void 0, function* () {
-        return (yield response.text()).startsWith('{"budget"');
+        return (yield response.text()).startsWith('{"id"');
     }));
+    yield page.waitForNetworkIdle({ idleTime: 500 });
     return data;
 });

@@ -1,13 +1,17 @@
-use std::fmt;
-use std::error::Error;
+use thiserror::Error;
 
-#[derive(Debug)]
-pub struct QueryError(pub String);
-
-impl fmt::Display for QueryError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "There is an error: {}", self.0)
-    }
+#[derive(Error, Debug)]
+pub enum EnumError {
+    #[error("Failed to parse either_bool {0}")]
+    EitherBool(String),
+    #[error("Failed to parse config weight {0}")]
+    ConfigWeight(String),
+    #[error("Failed to parse difficulty {0}")]
+    Difficulty(String),
 }
 
-impl Error for QueryError {}
+#[derive(Error, Debug)]
+pub enum VecError {
+    #[error("Empty monster vector for level {0}")]
+    EmptyMonster(i32),
+}

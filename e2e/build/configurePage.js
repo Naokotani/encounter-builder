@@ -8,12 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import puppeteer from 'puppeteer';
+import 'dotenv/config';
+const CLIENT_URL = process.env.CLIENT_URL;
 export default (level) => __awaiter(void 0, void 0, void 0, function* () {
     const browser = yield puppeteer.launch({
         headless: true,
     });
     const page = yield browser.newPage();
-    yield page.goto('https://alembichead.com/encounter-builder/');
+    yield page.goto(`${CLIENT_URL}encounter-builder/`);
     yield page.setViewport({ width: 1920, height: 1080 });
     yield page.select('#party-level', level.toString());
     return {

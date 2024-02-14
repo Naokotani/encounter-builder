@@ -1,4 +1,6 @@
 import puppeteer from 'puppeteer';
+import 'dotenv/config'
+const CLIENT_URL = process.env.CLIENT_URL;
 
 export default async (level: number) => {
   const browser = await puppeteer.launch({
@@ -7,7 +9,7 @@ export default async (level: number) => {
 
   const page = await browser.newPage();
 
-  await page.goto('https://alembichead.com/encounter-builder/');
+  await page.goto(`${CLIENT_URL}encounter-builder/`);
 
   await page.setViewport({width: 1920, height: 1080});
 

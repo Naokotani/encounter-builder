@@ -1,12 +1,12 @@
 import { Page } from 'puppeteer';
 
-export default async (page: Page) => {
+export default async (page: Page, url: string) => {
 	let data;
 
 	page.on('response', async (response) => {
 		try {
 
-			if (response.url().startsWith('https://alembichead.com/encounter?')) {
+			if (response.url().startsWith(`${url}encounter?`)) {
 				const responseData = await response.json();
 				data = responseData;
 			} else {
@@ -24,7 +24,9 @@ export default async (page: Page) => {
   await page.click(searchResultSelector);
 
 	await page.waitForResponse(async response => {
-		return (await response.text()).startsWith('{"budget"');
+		return (await response.text()).startsWith('{"id"');
 	});
+
+	await page.waitForNetworkIdle({idleTime: 500});
 	return data;
 }
