@@ -7,6 +7,14 @@ mod types {
     pub mod encounter;
     pub mod error;
     pub mod monster;
+    pub mod state;
+    pub mod monster_params;
+    pub mod encounter_params;
+}
+
+mod external {
+    pub mod encounter_json;
+    pub mod monster_json;
 }
 
 mod api {

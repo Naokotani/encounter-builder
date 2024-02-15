@@ -1,5 +1,5 @@
-use crate::types::encounter;
-use crate::types::encounter::EitherBool;
+use crate::types::monster_params;
+use crate::types::state::EitherBool;
 use crate::types::monster;
 use rand::Rng;
 use sqlx::postgres::PgRow;
@@ -11,7 +11,7 @@ use sqlx::Row;
 
 pub async fn query(
     monster_types: &Vec<String>,
-    params: &encounter::MonsterGroup,
+    params: &monster_params::MonsterParams,
     level: i32,
     pool: &PgPool,
     name: Option<&String>,
