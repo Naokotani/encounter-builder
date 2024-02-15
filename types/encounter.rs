@@ -70,8 +70,7 @@ impl Encounter {
             EncounterBudget::Extreme => 160.0 + adjust_budget(self.party_size),
         };
 
-        println!("\nStarting budget: {}", self.budget);
-
+        println!("Starting budget: {}", self.budget);
         let mut monster_list: Vec<monster::Monster> = Vec::new();
         self.get_bbeg_params();
 
@@ -92,6 +91,7 @@ impl Encounter {
                         monster_list.push(m);
                     } else {
                         self.bbeg.status = FillStatus::Failed;
+                        self.bbeg.level = self.bbeg_fail_budget();
                     }
                 }
                 Err(e) => {
@@ -116,19 +116,17 @@ impl Encounter {
             )
             .await?
             {
-                self.bbeg_budget();
-                println!("BBEG filled successfully");
                 monster_list.push(m);
                 self.bbeg.number = 1;
                 self.bbeg.status = FillStatus::Filled;
-            } else if bbeg_attempts == 3 {
+            } else {
+                self.bbeg.level = self.bbeg_fail_budget();
             };
             bbeg_attempts += 1;
         }
 
         self.budget -= self.bbeg.budget;
 
-        // println!("\nBBEG monster group: {:?}", bbeg_params);
         println!("BBEG budget {:?}", self.bbeg.budget);
         println!("Remaining budget {}\n", self.budget);
 
@@ -395,83 +393,83 @@ impl Encounter {
     }
 
     fn bbeg_budget(&mut self) -> Option<i32> {
-        if self.bbeg.level.is_none() {
-            match self.bbeg.budget {
-                b if b >= 160.0 => {
-                    self.bbeg.budget = 160.0;
-                    Some(self.level + 4)
-                }
-                b if b >= 120.0 => {
-                    self.bbeg.budget = 120.0;
-                    Some(self.level + 3)
-                }
-                b if b >= 80.0 => {
-                    self.bbeg.budget = 80.0;
-                    Some(self.level + 2)
-                }
-                b if b >= 60.0 => {
-                    self.bbeg.budget = 60.0;
-                    Some(self.level + 1)
-                }
-                b if b >= 40.0 => {
-                    self.bbeg.budget = 40.0;
-                    Some(self.level)
-                }
-                b if b >= 30.0 => {
-                    self.bbeg.budget = 30.0;
-                    Some(self.level - 1)
-                }
-                b if b >= 20.0 => {
-                    self.bbeg.budget = 20.0;
-                    Some(self.level - 2)
-                }
-                b if b >= 15.0 => {
-                    self.bbeg.budget = 15.0;
-                    Some(self.level - 3)
-                }
-                b if b >= 10.0 => {
-                    self.bbeg.budget = 10.0;
-                    Some(self.level - 4)
-                }
-                _ => None,
+        match self.bbeg.budget {
+            b if b >= 160.0 => {
+                self.bbeg.budget = 160.0;
+                Some(self.level + 4)
             }
-        } else {
-            let budget = self.bbeg.budget.round() as i32;
-            match budget {
-                160 => {
-                    self.bbeg.budget = 120.0;
-                    Some(self.level + 3)
-                }
-                120 => {
-                    self.bbeg.budget = 80.0;
-                    Some(self.level + 2)
-                }
-                80 => {
-                    self.bbeg.budget = 60.0;
-                    Some(self.level + 1)
-                }
-                60 => {
-                    self.bbeg.budget = 40.0;
-                    Some(self.level)
-                }
-                40 => {
-                    self.bbeg.budget = 30.0;
-                    Some(self.level - 1)
-                }
-                30 => {
-                    self.bbeg.budget = 20.0;
-                    Some(self.level - 2)
-                }
-                20 => {
-                    self.bbeg.budget = 15.0;
-                    Some(self.level - 3)
-                }
-                15 => {
-                    self.bbeg.budget = 10.0;
-                    Some(self.level - 4)
-                }
-                _ => None,
+            b if b >= 120.0 => {
+                self.bbeg.budget = 120.0;
+                Some(self.level + 3)
             }
+            b if b >= 80.0 => {
+                self.bbeg.budget = 80.0;
+                Some(self.level + 2)
+            }
+            b if b >= 60.0 => {
+                self.bbeg.budget = 60.0;
+                Some(self.level + 1)
+            }
+            b if b >= 40.0 => {
+                self.bbeg.budget = 40.0;
+                Some(self.level)
+            }
+            b if b >= 30.0 => {
+                self.bbeg.budget = 30.0;
+                Some(self.level - 1)
+            }
+            b if b >= 20.0 => {
+                self.bbeg.budget = 20.0;
+                Some(self.level - 2)
+            }
+            b if b >= 15.0 => {
+                self.bbeg.budget = 15.0;
+                Some(self.level - 3)
+            }
+            b if b >= 10.0 => {
+                self.bbeg.budget = 10.0;
+                Some(self.level - 4)
+            }
+            _ => None,
+        }
+    }
+
+    fn bbeg_fail_budget(&mut self) -> Option<i32> {
+        match self.level {
+            l if l == self.level + 4 => {
+                self.bbeg.budget -= 40.0;
+                Some(self.level + 3)
+            }
+            l if l == self.level + 3 => {
+                self.bbeg.budget -= 40.0;
+                Some(self.level + 2)
+            }
+            l if l == self.level + 2 => {
+                self.bbeg.budget -= 20.0;
+                Some(self.level + 1)
+            }
+            l if l == self.level + 1 => {
+                self.bbeg.budget -= 20.0;
+                Some(self.level)
+            }
+            l if l == self.level => {
+                self.bbeg.budget -= 10.0;
+                Some(self.level - 1)
+            }
+            l if l == self.level - 1 => {
+                self.bbeg.budget -= 10.0;
+                Some(self.level - 2)
+            }
+            l if l == self.level - 2 => {
+                self.bbeg.budget -= 10.0;
+                Some(self.level - 3)
+            }
+            l if l == self.level - 3 => {
+                self.bbeg.budget -= 5.0;
+                Some(self.level - 4)
+            }
+            l if l == self.level - 4 => Some(self.level - 4),
+            _ => None,
         }
     }
 }
@@ -491,51 +489,6 @@ fn adjust_budget(party_size: i32) -> f32 {
     }
 }
 
-// impl fmt::Display for Encounter {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         write!(
-//             f,
-//             "\
-//     level: {} party_size: {} budget: {}
-//     difficulty: {:?}
-//     monster_types: {:?}
-//     traits: {:?}
-//     configuration: {}
-//     bbeg_budget: {}
-//     bbeg_level: {:?}
-//     hench_budget: {}
-//     hench_level: {:?}
-//     lackey_budget: {}
-//     lackey_level: {:?}
-//     bbeg_status: {:?} bbeg_caster: {:?} bbeg_ranged: {:?}
-//     hench_status: {:?} hench_caster: {:?} hench_ranged: {:?}
-//     lackey_status: {:?} lackey_caster: {:?} lackey_ranged: {:?}\n",
-//             self.level,
-//             self.party_size,
-//             self.budget,
-//             self.difficulty,
-//             self.monster_types,
-//             self.traits,
-//             self.monster_weights,
-//             self.bbeg_budget,
-//             self.bbeg_level,
-//             self.hench_budget,
-//             self.hench_level,
-//             self.lackey_budget,
-//             self.lackey_level,
-//             self.bbeg_status,
-//             self.bbeg_caster,
-//             self.bbeg_ranged,
-//             self.hench_status,
-//             self.hench_caster,
-//             self.hench_ranged,
-//             self.lackey_status,
-//             self.lackey_caster,
-//             self.lackey_ranged,
-//         )
-//     }
-// }
-
 impl fmt::Display for MonsterWeights {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
@@ -548,12 +501,3 @@ impl fmt::Display for MonsterWeights {
         )
     }
 }
-
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-
-//     #[test]
-//     fn internal() {
-//     }
-// }

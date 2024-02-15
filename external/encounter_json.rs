@@ -1,35 +1,14 @@
+use crate::api::encounter_api;
 use crate::types::encounter;
 use crate::types::encounter_params;
 use crate::types::error;
 use crate::types::monster;
 use crate::types::monster_params;
 use crate::types::state::{EitherBool, EncounterBudget, FillStatus, Weight};
-use actix_web::{
-    body::BoxBody, http::header::ContentType, web, HttpRequest, HttpResponse, Responder,
-};
+use actix_web::{body::BoxBody, http::header::ContentType, HttpRequest, HttpResponse, Responder};
 use anyhow::Result;
+use serde::Serialize;
 use uuid::Uuid;
-use serde::{Serialize, Deserialize};
-
-#[derive(Deserialize, Debug)]
-pub struct QueryParams {
-    pub level: i32,
-    pub party_size: i32,
-    pub difficulty: String,
-    pub monster_types: String,
-    pub bbeg_budget: String,
-    pub bbeg_caster: String,
-    pub bbeg_ranged: String,
-    pub bbeg_aquatic: bool,
-    pub hench_budget: String,
-    pub hench_caster: String,
-    pub hench_ranged: String,
-    pub hench_aquatic: bool,
-    pub lackey_budget: String,
-    pub lackey_caster: String,
-    pub lackey_ranged: String,
-    pub lackey_aquatic: bool,
-}
 
 #[derive(Debug, Serialize)]
 pub struct EncounterJson {
@@ -93,7 +72,7 @@ impl Responder for EncounterJson {
 
 impl EncounterJson {
     pub async fn new(
-        query_params: web::Query<QueryParams>,
+        query_params: encounter_api::QueryParams,
     ) -> Result<Self, Box<dyn std::error::Error>> {
         let data = get_data(query_params).await;
         let (monsters, encounter) = data?;
@@ -165,7 +144,7 @@ impl EncounterJson {
 }
 
 async fn get_data(
-    query_params: web::Query<QueryParams>,
+    query_params: encounter_api::QueryParams,
 ) -> Result<(Vec<monster::Monster>, encounter::Encounter), Box<dyn std::error::Error>> {
     let difficulty = EncounterBudget::new(query_params.difficulty.as_str())?;
 
@@ -242,4 +221,131 @@ fn get_monster(
         }
     };
     Ok((monster, monsters))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn bbeg_solo() {
+        let difficulties: [&str; 5] = ["trivial", "low", "moderate", "severe", "extreme"];
+        for diff in difficulties.into_iter() {
+            bbeg_solo_levels(diff).await;
+        }
+    }
+
+    async fn bbeg_solo_levels(diff: &str) {
+        println!("dif: {}", diff);
+        for i in 1..20 {
+            println!("Bbeg, level: {}, difficulty: {}", i, diff);
+            let query = encounter_api::QueryParams {
+                level: i,
+                party_size: 4,
+                difficulty: String::from(diff),
+                monster_types: String::from("Animal"),
+                bbeg_budget: String::from("all"),
+                bbeg_caster: String::from("either"),
+                bbeg_ranged: String::from("either"),
+                bbeg_aquatic: false,
+                hench_budget: String::from("none"),
+                hench_caster: String::from("either"),
+                hench_ranged: String::from("either"),
+                hench_aquatic: false,
+                lackey_budget: String::from("none"),
+                lackey_caster: String::from("either"),
+                lackey_ranged: String::from("either"),
+                lackey_aquatic: false,
+            };
+
+            let res = EncounterJson::new(query)
+                .await
+                .expect("no result from encounter json new");
+            println!("Budget: {}", res.budget);
+
+            assert!(matches!(res.bbeg_level, l if l <= i + 4 && l >= i - 4));
+            assert!((0.0..=40.0).contains(&res.budget));
+
+        }
+    }
+
+    #[tokio::test]
+    async fn hench_solo() {
+        let difficulties: [&str; 5] = ["trivial", "low", "moderate", "severe", "extreme"];
+        for diff in difficulties.into_iter() {
+            hench_solo_levels(diff).await;
+        }
+    }
+
+    async fn hench_solo_levels(diff: &str) {
+        println!("dif: {}", diff);
+        for i in 1..20 {
+            println!("Hench, level: {}, difficulty: {}", i, diff);
+            let query = encounter_api::QueryParams {
+                level: i,
+                party_size: 4,
+                difficulty: String::from(diff),
+                monster_types: String::from("Animal"),
+                bbeg_budget: String::from("none"),
+                bbeg_caster: String::from("either"),
+                bbeg_ranged: String::from("either"),
+                bbeg_aquatic: false,
+                hench_budget: String::from("all"),
+                hench_caster: String::from("either"),
+                hench_ranged: String::from("either"),
+                hench_aquatic: false,
+                lackey_budget: String::from("none"),
+                lackey_caster: String::from("either"),
+                lackey_ranged: String::from("either"),
+                lackey_aquatic: false,
+            };
+
+            let res = EncounterJson::new(query)
+                .await
+                .expect("no result from encounter json new");
+
+            assert!(matches!(res.hench_level, l if l <= i && l >= i - 2));
+            assert!((0.0..=20.0).contains(&res.budget));
+        }
+    }
+
+    #[tokio::test]
+    async fn lackey_solo() {
+        let difficulties: [&str; 5] = ["trivial", "low", "moderate", "severe", "extreme"];
+        for diff in difficulties.into_iter() {
+            lackey_solo_levels(diff).await;
+        }
+    }
+
+    async fn lackey_solo_levels(diff: &str) {
+        println!("dif: {}", diff);
+        for i in 2..20 {
+            println!("Lackey, level: {}, difficulty: {}", i, diff);
+            let query = encounter_api::QueryParams {
+                level: i,
+                party_size: 4,
+                difficulty: String::from(diff),
+                monster_types: String::from("Animal"),
+                bbeg_budget: String::from("none"),
+                bbeg_caster: String::from("either"),
+                bbeg_ranged: String::from("either"),
+                bbeg_aquatic: false,
+                hench_budget: String::from("none"),
+                hench_caster: String::from("either"),
+                hench_ranged: String::from("either"),
+                hench_aquatic: false,
+                lackey_budget: String::from("all"),
+                lackey_caster: String::from("either"),
+                lackey_ranged: String::from("either"),
+                lackey_aquatic: false,
+            };
+
+            let res = EncounterJson::new(query)
+                .await
+                .expect("no result from encounter json new");
+
+            assert!(matches!(res.lackey_level, l if l == i -3 || l == i - 4));
+            assert!((0.0..=10.0).contains(&res.budget));
+        }
+    }
 }
