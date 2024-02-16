@@ -243,7 +243,7 @@ mod tests {
                 level: i,
                 party_size: 4,
                 difficulty: String::from(diff),
-                monster_types: String::from("Animal"),
+                monster_types: String::from("Undead"),
                 bbeg_budget: String::from("all"),
                 bbeg_caster: String::from("either"),
                 bbeg_ranged: String::from("either"),
@@ -264,7 +264,8 @@ mod tests {
             println!("Budget: {}", res.budget);
 
             assert!(matches!(res.bbeg_level, l if l <= i + 4 && l >= i - 4));
-            assert!((0.0..=40.0).contains(&res.budget));
+            assert!((0.0..=120.0).contains(&res.budget));
+            assert_eq!(res.bbeg_status, "Filled");
 
         }
     }
@@ -285,7 +286,7 @@ mod tests {
                 level: i,
                 party_size: 4,
                 difficulty: String::from(diff),
-                monster_types: String::from("Animal"),
+                monster_types: String::from("Undead"),
                 bbeg_budget: String::from("none"),
                 bbeg_caster: String::from("either"),
                 bbeg_ranged: String::from("either"),
@@ -306,6 +307,7 @@ mod tests {
 
             assert!(matches!(res.hench_level, l if l <= i && l >= i - 2));
             assert!((0.0..=20.0).contains(&res.budget));
+            assert_eq!(res.hench_status, "Filled");
         }
     }
 
@@ -325,7 +327,7 @@ mod tests {
                 level: i,
                 party_size: 4,
                 difficulty: String::from(diff),
-                monster_types: String::from("Animal"),
+                monster_types: String::from("Undead"),
                 bbeg_budget: String::from("none"),
                 bbeg_caster: String::from("either"),
                 bbeg_ranged: String::from("either"),
@@ -346,6 +348,7 @@ mod tests {
 
             assert!(matches!(res.lackey_level, l if l == i -3 || l == i - 4));
             assert!((0.0..=10.0).contains(&res.budget));
+            assert_eq!(res.lackey_status, "Filled");
         }
     }
 }

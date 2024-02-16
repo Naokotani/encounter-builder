@@ -24,9 +24,9 @@ async function loopLevels(difficulty: string) {
 async function test(d: string, l: number) {
 	return new Promise((resolve, reject) => {
 		try {
-			it(`Solo bbeg should be filled at level ${l}`, async function () {
+			it(`Solo bbeg should be filled at level ${l} difficulty: ${d}`, async function () {
 				const data = await bbegData(l, d, API_URL);
-				console.log(`${data.bbeg_name} id: ${data.id} level: ${data.bbeg_level}`);
+				console.log(`${data.bbeg_name} id: ${data.id} level: ${data.bbeg_level} difficulty: ${d}`);
 				assert.equal(data.bbeg_status, "Filled");
 				assert.notEqual(data.bbeg_name, "Failed To find Monster");
 			});

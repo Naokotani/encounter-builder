@@ -36,10 +36,10 @@ function test(d, l) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
             try {
-                it(`Solo bbeg should be filled at level ${l}`, function () {
+                it(`Solo bbeg should be filled at level ${l} difficulty: ${d}`, function () {
                     return __awaiter(this, void 0, void 0, function* () {
                         const data = yield bbegData(l, d, API_URL);
-                        console.log(`${data.bbeg_name} id: ${data.id} level: ${data.bbeg_level}`);
+                        console.log(`${data.bbeg_name} id: ${data.id} level: ${data.bbeg_level} difficulty: ${d}`);
                         assert.equal(data.bbeg_status, "Filled");
                         assert.notEqual(data.bbeg_name, "Failed To find Monster");
                     });
