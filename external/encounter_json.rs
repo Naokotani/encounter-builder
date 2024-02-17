@@ -77,6 +77,7 @@ impl EncounterJson {
     ) -> Result<Self, Box<dyn std::error::Error>> {
         let data = get_data(query_params).await;
         let (monsters, encounter) = data?;
+        println!("{:?}", monsters);
 
         let lackey_level = encounter.lackey.level.unwrap_or(encounter.level - 3);
         let (lackey, monsters) = get_monster(&encounter.lackey.status, lackey_level, monsters)?;
@@ -261,7 +262,7 @@ mod tests {
             event!(Level::INFO, res.budget);
 
             assert!(matches!(res.bbeg_level, l if l <= i + 4 && l >= i - 4));
-            assert!((0.0..=40.0).contains(&res.budget));
+            assert_eq!(res.bbeg_status, "Filled");
 
         }
     }

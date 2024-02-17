@@ -71,6 +71,67 @@ impl Encounter {
             EncounterBudget::Extreme => 160.0 + adjust_budget(self.party_size),
         };
 
+        println!("Starting budget: {}", self.budget);
+        
+        let mut monster_list: Vec<monster::Monster> = Vec::new();
+        self.get_bbeg_params();
+        println!("Bbeg level: {:?}", self.bbeg.level);
+
+        if self.bbeg.status != FillStatus::Skipped {
+            let result = query::query(
+                &self.monster_types,
+                &self.bbeg,
+                self.bbeg.level.unwrap(),
+                &pool,
+                None,
+            )
+            .await;
+            match result {
+                Ok(m) => {
+                    if let Some(m) = m {
+                        self.bbeg.number = 1;
+                        self.bbeg.status = FillStatus::Filled;
+                        monster_list.push(m);
+                    } else {
+                        self.bbeg.status = FillStatus::Failed;
+                        self.bbeg.level = self.bbeg_fail_budget();
+                    }
+                }
+                Err(e) => {
+                    return Err(e);
+                }
+            }
+        }
+
+        let mut bbeg_attempts = 0;
+        while self.bbeg.status == FillStatus::Failed && bbeg_attempts < 4 {
+            println!(
+                "BBEG failed for level {}, attempting to fill.",
+                self.bbeg.level.unwrap()
+            );
+            if let Some(m) = query::query(
+                &self.monster_types,
+                &self.bbeg,
+                self.bbeg.level.unwrap(),
+                &pool,
+                None,
+            )
+            .await?
+            {
+                monster_list.push(m);
+                self.bbeg.number = 1;
+                self.bbeg.status = FillStatus::Filled;
+            } else {
+                self.bbeg.level = self.bbeg_fail_budget();
+            };
+            bbeg_attempts += 1;
+        }
+
+        println!("BBEG budget {:?}", self.bbeg.budget);
+        println!("Remaining budget {}\n", self.budget);
+
+        self.budget -= self.bbeg.budget;
+
         self.get_hench_params();
         if self.hench.number > 0 && self.hench.status != FillStatus::Skipped {
             let result = query::query(
@@ -84,7 +145,7 @@ impl Encounter {
             match result {
                 Ok(m) => {
                     if let Some(m) = m {
-                        event!(Level::DEBUG, "Hench budget {:?}, remaining budget: {}", self.hench.budget, self.budget);
+                        event!(Level::DEBUG, "Hench filled successfully budget {:?}, remaining budget: {}", self.hench.budget, self.budget);
                         self.hench.status = FillStatus::Filled;
                         monster_list.push(m);
                     } else {
@@ -119,7 +180,7 @@ impl Encounter {
             )
             .await?
             {
-                event!(Level::DEBUG, "Hench budget {:?}, remaining budget: {}", self.hench.budget, self.budget);
+                event!(Level::INFO, "Hehcman filled. budget {:?}, remaining budget: {}", self.hench.budget, self.budget);
                 monster_list.push(m);
                 self.hench.status = FillStatus::Filled;
                 break;
@@ -375,7 +436,9 @@ impl Encounter {
     }
 
     fn bbeg_fail_budget(&mut self) -> Option<i32> {
-        match self.level {
+        println!("bbeg level {}", self.bbeg.level.unwrap());
+        println!("party level: {}", self.level);
+        match self.bbeg.level.unwrap() {
             l if l == self.level + 4 => {
                 self.bbeg.budget -= 40.0;
                 Some(self.level + 3)
