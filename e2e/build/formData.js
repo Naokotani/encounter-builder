@@ -29,5 +29,6 @@ export default (page, url) => __awaiter(void 0, void 0, void 0, function* () {
     yield page.waitForResponse((response) => __awaiter(void 0, void 0, void 0, function* () {
         return (yield response.text()).startsWith('{"id"');
     }));
+    yield page.waitForNetworkIdle({ idleTime: 500 });
     return data;
 });

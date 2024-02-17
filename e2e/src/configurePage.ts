@@ -13,8 +13,6 @@ export default async (level: number) => {
 
   await page.setViewport({width: 1920, height: 1080});
 
-	await page.waitForNetworkIdle();
-
 	await page.select('#party-level', level.toString())
 
 	return {

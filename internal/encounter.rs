@@ -134,6 +134,7 @@ impl Encounter {
                    "Bbeg failed for level {}, attempting to fill.",
                    self.bbeg.level.unwrap()
             );
+            self.get_bbeg_params();
             if let Some(m) = query::query(
                 &self.monster_types,
                 &self.bbeg,
@@ -460,8 +461,7 @@ impl Encounter {
     }
 
     fn bbeg_fail_budget(&mut self) -> Option<i32> {
-        let level = self.bbeg.level.unwrap();
-        match level {
+        match self.level {
             l if l == self.level + 4 => {
                 self.bbeg.budget -= 40.0;
                 Some(self.level + 3)
