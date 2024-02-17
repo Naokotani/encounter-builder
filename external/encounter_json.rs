@@ -1,5 +1,6 @@
+use tracing::{event, Level};
 use crate::api::encounter_api;
-use crate::types::encounter;
+use crate::internal::encounter;
 use crate::types::encounter_params;
 use crate::types::error;
 use crate::types::monster;
@@ -77,10 +78,6 @@ impl EncounterJson {
         let data = get_data(query_params).await;
         let (monsters, encounter) = data?;
 
-        for monster in &monsters {
-            println!("{}", monster);
-        }
-
         let lackey_level = encounter.lackey.level.unwrap_or(encounter.level - 3);
         let (lackey, monsters) = get_monster(&encounter.lackey.status, lackey_level, monsters)?;
 
@@ -98,7 +95,7 @@ impl EncounterJson {
         let lackey_status = encounter.lackey.status.stringify();
 
         let id = Uuid::new_v4();
-        println!("encounter id {}", id);
+        event!(Level::INFO, "Encounter created with id: {}", id);
 
         Ok(EncounterJson {
             id: id.to_string(),
@@ -236,9 +233,9 @@ mod tests {
     }
 
     async fn bbeg_solo_levels(diff: &str) {
-        println!("dif: {}", diff);
+        event!(Level::INFO, diff);
         for i in 1..20 {
-            println!("Bbeg, level: {}, difficulty: {}", i, diff);
+            event!(Level::INFO, group="Bbeg", i, diff);
             let query = encounter_api::QueryParams {
                 level: i,
                 party_size: 4,
@@ -261,7 +258,7 @@ mod tests {
             let res = EncounterJson::new(query)
                 .await
                 .expect("no result from encounter json new");
-            println!("Budget: {}", res.budget);
+            event!(Level::INFO, res.budget);
 
             assert!(matches!(res.bbeg_level, l if l <= i + 4 && l >= i - 4));
             assert!((0.0..=120.0).contains(&res.budget));
@@ -279,9 +276,9 @@ mod tests {
     }
 
     async fn hench_solo_levels(diff: &str) {
-        println!("dif: {}", diff);
+        event!(Level::INFO, diff);
         for i in 1..20 {
-            println!("Hench, level: {}, difficulty: {}", i, diff);
+            event!(Level::INFO, group="Henchman", i, diff);
             let query = encounter_api::QueryParams {
                 level: i,
                 party_size: 4,
@@ -320,9 +317,9 @@ mod tests {
     }
 
     async fn lackey_solo_levels(diff: &str) {
-        println!("dif: {}", diff);
+        event!(Level::INFO, diff);
         for i in 2..20 {
-            println!("Lackey, level: {}, difficulty: {}", i, diff);
+            event!(Level::INFO, group="Henchman", i, diff);
             let query = encounter_api::QueryParams {
                 level: i,
                 party_size: 4,

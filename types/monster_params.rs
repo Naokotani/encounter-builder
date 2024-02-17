@@ -12,7 +12,10 @@ pub struct MonsterParams {
 }
 
 impl MonsterParams {
-    pub fn new(is_caster: EitherBool, is_ranged: EitherBool, is_aquatic: bool) -> Self {
+    pub fn new(is_caster: EitherBool,
+               is_ranged: EitherBool,
+               is_aquatic: bool,
+    ) -> Self {
         MonsterParams {
             budget: 0.0,
             level: None,
