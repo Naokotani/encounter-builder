@@ -1,4 +1,5 @@
 use crate::types::monster_params;
+use tracing::{event, span, Level};
 use crate::types::state::EitherBool;
 use crate::types::monster;
 use rand::Rng;
@@ -16,6 +17,9 @@ pub async fn query(
     pool: &PgPool,
     name: Option<&String>,
 ) -> Result<Option<monster::Monster>, Box<dyn std::error::Error>> {
+let span = span!(Level::TRACE, "database call");
+let _enter = span.enter();
+
     let mut builder: QueryBuilder<Postgres> = QueryBuilder::new(
         "
 SELECT
@@ -33,7 +37,6 @@ FROM monsters_new
 WHERE level = ",
     );
 
-    println!("{}", params.is_aquatic);
     builder.push_bind(level);
 
     if params.is_aquatic {
@@ -108,16 +111,15 @@ WHERE level = ",
     let monster_traits = vec![String::from("Undead")];
 
     if monster_data.is_empty() {
-        println!(
-            "Search for level: {} caster: {:?} ranged: {:?} type: {:?} produced no results",
-            level, params.is_caster, params.is_ranged, monster_types
-        );
+        event!(Level::WARN, status = "query fail", level);
         return Ok(None);
     }
-
+   
     let mut rng = rand::thread_rng();
     let random_monster = monster_data.remove(rng.gen_range(0..monster_data.len()));
 
     let monster = monster::Monster::new(random_monster, monster_traits, params.number).unwrap();
+
+
     Ok(Some(monster))
 }

@@ -1,5 +1,6 @@
 use serde::Deserialize;
 use crate::types::error::EnumError;
+use std::fmt;
 
 #[derive(Debug, Deserialize)]
 pub enum EncounterBudget {
@@ -70,6 +71,15 @@ impl EitherBool {
     }
 }
 
+impl fmt::Display for EitherBool {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+       match self {
+           EitherBool::Either => write!(f, "Either"),
+           EitherBool::True => write!(f, "True"),
+           EitherBool::False => write!(f, "False"),
+       }
+    }
+}
 
 #[derive(PartialEq, Debug)]
 pub enum FillStatus {
