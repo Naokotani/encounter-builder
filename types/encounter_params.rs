@@ -1,4 +1,4 @@
-use crate::internal::encounter;
+use crate::types::encounter;
 use crate::types::state::EncounterBudget;
 
 pub struct EncounterParams {

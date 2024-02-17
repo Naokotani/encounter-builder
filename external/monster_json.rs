@@ -1,7 +1,6 @@
 use actix_web::{
     body::BoxBody, http::header::ContentType, HttpRequest, HttpResponse, Responder
 };
-use tracing::{event, Level};
 use serde::Serialize;
 use sqlx::postgres::PgPoolOptions;
 use crate::types::monster_params;
@@ -53,7 +52,7 @@ impl MonsterJson {
         );
 
         let monster_budget = if query_params.bbeg {
-            event!(Level::DEBUG, query_params.bbeg);
+            println!("Bbeg: {}", query_params.bbeg);
             MonsterBudget {
                 level: query_params.level,
                 budget,
@@ -66,9 +65,11 @@ impl MonsterJson {
         } else {
             panic!("Unable to get budget for: {}", query_params.number)
         };
-        let budget = format!("Budget: {:?}", monster_budget);
-        event!(Level::DEBUG, msg="Monster Budget", budget);
-        event!(Level::DEBUG, query_params.number, query_params.level, query_params.budget);
+
+        println!("{}", query_params.number);
+        println!("level: {}", query_params.level);
+        println!("{}", query_params.budget);
+        println!("{:?}", monster_budget);
 
         let monster_types: Vec<String> = query_params
             .monster_types
@@ -83,7 +84,7 @@ impl MonsterJson {
         };
 
         if let Some(m) = monster {
-            event!(Level::INFO, m.name, monster_budget.number, monster_budget.level, status="Filled");
+            println!("{:?}", m);
             MonsterJson {
                 budget: monster_budget.budget,
                 url: m.url,
@@ -98,7 +99,6 @@ impl MonsterJson {
                 status: String::from("Filled"),
             }
         } else {
-            event!(Level::WARN, status="Failed to find monster");
             MonsterJson {
                 budget: 10,
                 url: String::from(""),

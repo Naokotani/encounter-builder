@@ -4,11 +4,12 @@ use actix_web::{middleware, App, HttpServer};
 use dotenv::dotenv;
 
 mod types {
+    pub mod encounter;
     pub mod error;
+    pub mod monster;
     pub mod state;
     pub mod monster_params;
     pub mod encounter_params;
-    pub mod monster;
 }
 
 mod external {
@@ -16,9 +17,6 @@ mod external {
     pub mod monster_json;
 }
 
-mod internal {
-    pub mod encounter;
-}
 mod api {
     pub mod encounter_api;
     pub mod monster_api;
