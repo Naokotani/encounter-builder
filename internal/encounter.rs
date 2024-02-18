@@ -97,9 +97,6 @@ impl Encounter {
                          None)
         );
 
-        self.bbeg.weight.get_budget(self.budget);
-
-
         let mut monster_list: Vec<monster::Monster>= Vec::new();
         
         if self.bbeg.status == FillStatus::Pending {
@@ -112,7 +109,6 @@ impl Encounter {
         }
 
         self.budget -= self.bbeg.budget;
-        self.hench.weight.get_budget(self.budget);
 
         if self.hench.status == FillStatus::Pending {
             if let Some(m) = hench_list.unwrap() {
@@ -125,7 +121,6 @@ impl Encounter {
 
         self.budget -= self.hench.budget;
 
-        self.lackey.weight.get_budget(self.budget);
         if self.lackey.status == FillStatus::Pending {
             if let Some(m) = lackey_list.unwrap() {
                 self.lackey.status = FillStatus::Filled;
