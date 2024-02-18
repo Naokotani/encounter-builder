@@ -82,15 +82,15 @@ impl MonsterJson {
                                    monster_budget.level,
                                    monster_budget.level,
                                    &pool,
-                                   Some(&query_params.name)).await;
+                                   None).await;
 
         let monster = match monster {
             Ok(m) => m,
             Err(_) => panic!("Couldn't retrieve monsters {:?}", query_params),
         };
 
-        
         let mut monster = monster.unwrap();
+
         let mut rng = rand::thread_rng();
 
         let index = rng.gen_range(0..monster.len());
@@ -99,6 +99,19 @@ impl MonsterJson {
                 vec![String::from("Undead")],
                 1
                 ).unwrap();
+
+        let m = if m.name == query_params.name && !monster.is_empty() {
+            let mut rng = rand::thread_rng();
+            let index = rng.gen_range(0..monster.len());
+
+            monster::Monster::new(
+                monster.remove(index),
+                vec![String::from("Undead")],
+                1
+                ).unwrap()
+        } else {
+            m
+        };
 
         event!(Level::INFO, m.name, monster_budget.number, monster_budget.level, status="Filled");
 
@@ -115,21 +128,6 @@ impl MonsterJson {
                 is_ranged: m.is_ranged,
                 status: String::from("Filled"),
             }
-        // } else {
-        //     event!(Level::WARN, status="Failed to find monster");
-        //     MonsterJson {
-        //         budget: 10,
-        //         url: String::from(""),
-        //         name: String::from("Failed To find Monster"),
-        //         number: 0,
-        //         level: 0,
-        //         alignment: String::from(""),
-        //         monster_type: String::from(""),
-        //         aquatic: false,
-        //         is_caster: false,
-        //         is_ranged: false,
-        //         status: String::from("Failed"),
-        //     }
     }
 }
 
