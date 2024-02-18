@@ -18,6 +18,7 @@ mod external {
 
 mod internal {
     pub mod encounter;
+    pub mod monster_budget;
 }
 mod api {
     pub mod encounter_api;

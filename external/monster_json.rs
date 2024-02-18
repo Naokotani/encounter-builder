@@ -1,21 +1,13 @@
-use actix_web::{
-    body::BoxBody, http::header::ContentType, HttpRequest, HttpResponse, Responder
-};
-use tracing::{event, Level};
+use crate::handlers::query;
+use crate::internal::monster_budget::MonsterBudget;
+use crate::monster_api;
+use crate::types::state::{EitherBool, Weight};
+use crate::types::{monster, monster_params};
+use actix_web::{body::BoxBody, http::header::ContentType, HttpRequest, HttpResponse, Responder};
 use rand::Rng;
 use serde::Serialize;
 use sqlx::postgres::PgPoolOptions;
-use crate::types::{monster_params, monster};
-use crate::types::state::{EitherBool, Weight};
-use crate::handlers::query;
-use crate::monster_api;
-
-#[derive(Debug)]
-struct MonsterBudget {
-    level: i32,
-    budget: i32,
-    number: i32,
-}
+use tracing::{event, Level};
 
 #[derive(Serialize, Debug)]
 pub struct MonsterJson {
@@ -42,8 +34,8 @@ impl MonsterJson {
 
         let is_ranged = query_params.is_ranged.as_str();
         let is_caster = query_params.is_caster.as_str();
-        let level_mod = query_params.level - query_params.party_level;
         let party_level = query_params.party_level;
+        let level = query_params.level;
         let budget = query_params.budget;
         let is_aquatic = query_params.is_aquatic;
 
@@ -51,38 +43,22 @@ impl MonsterJson {
             EitherBool::new(is_ranged).unwrap(),
             EitherBool::new(is_caster).unwrap(),
             is_aquatic,
-            Weight::All
+            Weight::All,
         );
 
-        let monster_budget = if query_params.bbeg {
-            event!(Level::DEBUG, query_params.bbeg);
-            MonsterBudget {
-                level: query_params.level,
-                budget,
-                number: 1,
-            }
-        } else if level_mod == -3 ||  level_mod == -4 {
-          lackey_budget(party_level, level_mod, budget)
-        } else if level_mod <= 0 || level_mod >= -2 {
-          henchman_budget(party_level, level_mod, budget)
-        } else {
-            panic!("Unable to get budget for: {}", query_params.number)
+        let (upper, lower) = match level {
+            l if query_params.bbeg => (l, l),
+            l if l == party_level - 3 || l == party_level - 4 => (party_level - 3, party_level - 4),
+            l if l <= party_level || l <= party_level - 2 => (party_level, party_level - 2),
+            l => panic!("Invalid level mod {}", l),
         };
-        let budget = format!("Budget: {:?}", monster_budget);
-        event!(Level::DEBUG, msg="Monster Budget", budget);
-        event!(Level::DEBUG, query_params.number, query_params.level, query_params.budget);
 
         let monster_types: Vec<String> = query_params
             .monster_types
             .split(',')
             .map(|v| v.to_string())
             .collect();
-        let monster = query::query(&monster_types,
-                                   &monster_group,
-                                   monster_budget.level,
-                                   monster_budget.level,
-                                   &pool,
-                                   None).await;
+        let monster = query::query(&monster_types, &monster_group, upper, lower, &pool, None).await;
 
         let monster = match monster {
             Ok(m) => m,
@@ -94,40 +70,50 @@ impl MonsterJson {
         let mut rng = rand::thread_rng();
 
         let index = rng.gen_range(0..monster.len());
-        let m = monster::Monster::new(
-                monster.remove(index),
-                vec![String::from("Undead")],
-                1
-                ).unwrap();
+        let m =
+            monster::Monster::new(monster.remove(index), vec![String::from("Undead")], 1).unwrap();
 
         let m = if m.name == query_params.name && !monster.is_empty() {
             let mut rng = rand::thread_rng();
             let index = rng.gen_range(0..monster.len());
 
-            monster::Monster::new(
-                monster.remove(index),
-                vec![String::from("Undead")],
-                1
-                ).unwrap()
+            monster::Monster::new(monster.remove(index), vec![String::from("Undead")], 1).unwrap()
         } else {
             m
         };
 
-        event!(Level::INFO, m.name, monster_budget.number, monster_budget.level, status="Filled");
+        let monster_budget = match m.level {
+            l if query_params.bbeg => MonsterBudget::bbeg_budget(l, budget),
+            l if l == party_level - 3 || l == party_level - 4 => {
+                MonsterBudget::lackey_budget(party_level, l, budget)
+            }
+            l if l <= party_level || l <= party_level - 2 => {
+                MonsterBudget::hench_budget(party_level, l, budget)
+            }
+            l => panic!("Invalid level mod {}", l),
+        };
+
+        event!(
+            Level::INFO,
+            m.name,
+            monster_budget.number,
+            monster_budget.level,
+            status = "Filled"
+        );
 
         MonsterJson {
-                budget: monster_budget.budget,
-                url: m.url,
-                name: m.name,
-                number: monster_budget.number,
-                level: monster_budget.level,
-                alignment: m.alignment,
-                monster_type: m.monster_type,
-                aquatic: false,
-                is_caster: m.is_caster,
-                is_ranged: m.is_ranged,
-                status: String::from("Filled"),
-            }
+            budget: monster_budget.budget,
+            url: m.url,
+            name: m.name,
+            number: monster_budget.number,
+            level: monster_budget.level,
+            alignment: m.alignment,
+            monster_type: m.monster_type,
+            aquatic: false,
+            is_caster: m.is_caster,
+            is_ranged: m.is_ranged,
+            status: String::from("Filled"),
+        }
     }
 }
 
@@ -140,84 +126,6 @@ impl Responder for MonsterJson {
         HttpResponse::Ok()
             .content_type(ContentType::json())
             .body(body)
-    }
-}
-
-
-fn lackey_budget(party_level: i32, level: i32, budget: i32) -> MonsterBudget {
-    let lackey_mod = match level {
-        -3 if party_level > 3 && budget >= 20 => -4,
-        -4 => -3,
-        -3 => -3,
-        _ => panic!("Level mod out of range {}", level),
-    };
-    let mut budget = budget as f32;
-
-
-    match lackey_mod {
-        -4 => {
-            budget -= budget % 10.0;
-            let number = (budget / 10.0).round() as i32;
-            MonsterBudget {
-                budget: number * 10,
-                level: party_level - 4,
-                number,
-            }
-        }
-        -3 => {
-            budget -= budget % 15.0;
-            let number = (budget / 15.0).round() as i32;
-            MonsterBudget {
-                budget: number * 15,
-                level: party_level - 3,
-                number,
-            }
-        }
-        _ => panic!("invalid random range"),
-    }
-}
-
-fn henchman_budget(party_level: i32, level: i32, budget: i32) -> MonsterBudget {
-    let hench_mod = match level {
-        -2 if budget >= 30 => -1,
-        -1 if budget >= 40 => 0,
-         0 if party_level > 1 => -2,
-        _ if budget >= 30 => -1,
-        -2 => -2,
-        _ => panic!("ya dun goofed"),
-    };
-
-    let mut budget = budget as f32;
-
-    match hench_mod {
-        -2 => {
-            budget -= budget % 20.0;
-            let number = (budget / 20.0).round() as i32;
-            MonsterBudget {
-                budget: number * 20,
-                level: party_level - 2,
-                number,
-            }
-        }
-        -1 => {
-            budget -= budget % 30.0;
-            let number = (budget / 30.0).round() as i32;
-            MonsterBudget {
-                budget: number * 30,
-                level: party_level - 1,
-                number,
-            }
-        }
-        0 => {
-            budget -= budget % 40.0;
-            let number = (budget / 40.0).round() as i32;
-            MonsterBudget {
-                budget: number * 40,
-                level: party_level,
-                number,
-            }
-        }
-        _ => panic!("invalid random range"),
     }
 }
 
@@ -241,7 +149,6 @@ mod tests {
 
         let result = MonsterJson::new(query).await;
 
-        assert_eq!(result.budget, 80);
         assert_eq!(result.number, 1);
         assert_eq!(result.monster_type, "Animal");
         assert_ne!(result.name, "Failed To find Monster");
@@ -265,7 +172,6 @@ mod tests {
 
         let result = MonsterJson::new(query).await;
 
-        assert_eq!(result.budget, 80);
         assert_eq!(result.monster_type, "Animal");
         assert_ne!(result.name, "Failed To find Monster");
         assert_ne!(result.status, "Skipped");
@@ -288,7 +194,6 @@ mod tests {
 
         let result = MonsterJson::new(query).await;
 
-        assert_eq!(result.budget, 75);
         assert_eq!(result.monster_type, "Animal");
         assert_ne!(result.name, "Failed To find Monster");
         assert_ne!(result.status, "Skipped");
@@ -311,7 +216,6 @@ mod tests {
 
         let result = MonsterJson::new(query).await;
 
-        assert_eq!(result.budget, 80);
         assert_eq!(result.monster_type, "Animal");
         assert_ne!(result.name, "Failed To find Monster");
         assert_ne!(result.status, "Skipped");
