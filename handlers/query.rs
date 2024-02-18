@@ -1,8 +1,7 @@
 use crate::types::monster_params;
 use tracing::{event, span, Level};
-use crate::types::state::EitherBool;
+use crate::types::state::{EitherBool, FillStatus};
 use crate::types::monster;
-use rand::Rng;
 use sqlx::postgres::PgRow;
 use sqlx::Execute;
 use sqlx::PgPool;
@@ -13,10 +12,16 @@ use sqlx::Row;
 pub async fn query(
     monster_types: &Vec<String>,
     params: &monster_params::MonsterParams,
-    level: i32,
+    upper: i32,
+    lower: i32,
     pool: &PgPool,
     name: Option<&String>,
-) -> Result<Option<monster::Monster>, Box<dyn std::error::Error>> {
+) -> Result<Option<Vec<monster::MonsterData>>, Box<dyn std::error::Error>> {
+
+    if params.status == FillStatus::Skipped {
+        return Ok(None);
+    }
+
 let span = span!(Level::TRACE, "database call");
 let _enter = span.enter();
 
@@ -34,10 +39,12 @@ aquatic,
 is_caster,
 is_ranged
 FROM monsters_new
-WHERE level = ",
+WHERE level >= ",
     );
 
-    builder.push_bind(level);
+    builder.push_bind(lower);
+    builder.push("\nAND level <= ");
+    builder.push_bind(upper);
 
     if params.is_aquatic {
         builder.push("\nAND aquatic = TRUE");
@@ -92,7 +99,7 @@ WHERE level = ",
     let arguments = query.take_arguments().unwrap();
     let sql = query.sql();
 
-    let mut monster_data = sqlx::query_with(sql, arguments)
+    let monster_data = sqlx::query_with(sql, arguments)
         .map(|row: PgRow| monster::MonsterData {
             creature_id: row.get(0),
             url: row.get(1),
@@ -108,18 +115,10 @@ WHERE level = ",
         .fetch_all(pool)
         .await?;
 
-    let monster_traits = vec![String::from("Undead")];
-
     if monster_data.is_empty() {
-        event!(Level::WARN, status = "query fail", level);
+        event!(Level::ERROR, status = "query fail between", upper, lower);
         return Ok(None);
     }
-   
-    let mut rng = rand::thread_rng();
-    let random_monster = monster_data.remove(rng.gen_range(0..monster_data.len()));
 
-    let monster = monster::Monster::new(random_monster, monster_traits, params.number).unwrap();
-
-
-    Ok(Some(monster))
+    Ok(Some(monster_data))
 }

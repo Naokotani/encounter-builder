@@ -1,4 +1,5 @@
 use std::fmt;
+use tracing::{event, Level};
 
 #[derive(Debug)]
 pub struct MonsterData {
@@ -28,11 +29,14 @@ pub struct Monster {
     pub aquatic: bool,
     pub is_caster: bool,
     pub is_ranged: bool,
-    
 }
 
 impl Monster {
-    pub fn new(data: MonsterData, traits: Vec<String>, number: i32) -> Result<Monster, &'static str> {
+    pub fn new(
+        data: MonsterData,
+        traits: Vec<String>,
+        number: i32,
+    ) -> Result<Monster, &'static str> {
         let creature_id = data.creature_id.ok_or("Failed to fetch creature id")?;
         let url = data.url.ok_or("Failed to fetch url")?;
         let name = data.name.ok_or("Failed to fetch name")?;
@@ -44,6 +48,7 @@ impl Monster {
         let is_caster = data.is_caster.ok_or("Failed to fetch is caster")?;
         let is_ranged = data.is_ranged.ok_or("Failed to fetch is ranged")?;
 
+        event!(Level::INFO, status="Creating monster", name, number);
         Ok(Monster {
             creature_id,
             url,
@@ -58,6 +63,23 @@ impl Monster {
             is_caster,
             is_ranged,
         })
+    }
+
+    pub fn empty() -> Self {
+        Monster {
+            creature_id: 0,
+            url: String::from(""),
+            name: String::from("Failed to find monster"),
+            number: 0,
+            level: 0,
+            alignment: String::from(""),
+            monster_type: String::from(""),
+            size: String::from(""),
+            traits: vec![String::from("")],
+            aquatic: false,
+            is_caster: false,
+            is_ranged: false,
+        }
     }
 }
 

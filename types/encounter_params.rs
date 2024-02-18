@@ -1,4 +1,3 @@
-use crate::internal::encounter;
 use crate::types::state::EncounterBudget;
 
 pub struct EncounterParams {
@@ -7,7 +6,6 @@ pub struct EncounterParams {
     pub difficulty: EncounterBudget,
     pub monster_types: Vec<String>,
     pub traits: Vec<String>,
-    pub monster_weights: encounter::MonsterWeights,
     pub budget: f32,
 }
 
@@ -17,7 +15,6 @@ impl EncounterParams {
         party_size: i32,
         difficulty: EncounterBudget,
         monster_types: Vec<String>,
-        monster_weights: encounter::MonsterWeights,
     ) -> Self {
         EncounterParams {
             level,
@@ -25,7 +22,6 @@ impl EncounterParams {
             difficulty,
             monster_types,
             traits: Vec::new(),
-            monster_weights,
             budget: 0.0,
         }
     }

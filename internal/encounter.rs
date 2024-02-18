@@ -13,7 +13,6 @@ pub struct Encounter {
     pub difficulty: EncounterBudget,
     pub monster_types: Vec<String>,
     pub traits: Vec<String>,
-    pub monster_weights: MonsterWeights,
     pub budget: f32,
     pub bbeg: monster_params::MonsterParams,
     pub hench: monster_params::MonsterParams,
@@ -50,7 +49,6 @@ impl Encounter {
             difficulty: encounter.difficulty,
             monster_types: encounter.monster_types,
             traits: Vec::new(),
-            monster_weights: encounter.monster_weights,
             budget: 0.0,
             bbeg,
             hench,
@@ -71,410 +69,239 @@ impl Encounter {
             EncounterBudget::Extreme => 160.0 + adjust_budget(self.party_size),
         };
 
-        println!("Starting budget: {}", self.budget);
-        
-        let mut monster_list: Vec<monster::Monster> = Vec::new();
-        self.get_bbeg_params();
-        println!("Bbeg level: {:?}", self.bbeg.level);
+        event!(Level::INFO, self.level);
+        println!("Level {}", self.level);
 
-        if self.bbeg.status != FillStatus::Skipped {
-            let result = query::query(
-                &self.monster_types,
-                &self.bbeg,
-                self.bbeg.level.unwrap(),
-                &pool,
-                None,
-            )
-            .await;
-            match result {
-                Ok(m) => {
-                    if let Some(m) = m {
-                        self.bbeg.number = 1;
-                        self.bbeg.status = FillStatus::Filled;
-                        monster_list.push(m);
-                    } else {
-                        self.bbeg.status = FillStatus::Failed;
-                        self.bbeg.level = self.bbeg_fail_budget();
-                    }
-                }
-                Err(e) => {
-                    return Err(e);
-                }
+        let (bbeg_upper_level, bbeg_lower_level) = bbeg_range(self.level);
+        let (hench_upper_level, hench_lower_level) = hench_range(self.level);
+        let (lackey_upper_level, lackey_lower_level) = lackey_range(self.level);
+        
+        let (bbeg_list, hench_list, lackey_list) = tokio::join!(
+            query::query(&self.monster_types,
+                         &self.bbeg,
+                         bbeg_upper_level,
+                         bbeg_lower_level,
+                         &pool,
+                         None),
+            query::query(&self.monster_types,
+                         &self.hench,
+                         hench_upper_level,
+                         hench_lower_level,
+                         &pool,
+                         None),
+            query::query(&self.monster_types,
+                         &self.lackey,
+                         lackey_upper_level,
+                         lackey_lower_level,
+                         &pool,
+                         None)
+        );
+
+        self.bbeg.weight.get_budget(self.budget);
+
+
+        let mut monster_list: Vec<monster::Monster>= Vec::new();
+        
+        if self.bbeg.status == FillStatus::Pending {
+            if let Some(m) = bbeg_list.unwrap() {
+                self.bbeg.status = FillStatus::Filled;
+                monster_list.push(self.bbeg_budget(m, self.bbeg.weight.get_budget(self.budget)));
+            } else {
+                self.bbeg.status = FillStatus::Failed;
             }
         }
-
-        let mut bbeg_attempts = 0;
-        while self.bbeg.status == FillStatus::Failed && bbeg_attempts < 4 {
-            println!(
-                "BBEG failed for level {}, attempting to fill.",
-                self.bbeg.level.unwrap()
-            );
-            if let Some(m) = query::query(
-                &self.monster_types,
-                &self.bbeg,
-                self.bbeg.level.unwrap(),
-                &pool,
-                None,
-            )
-            .await?
-            {
-                monster_list.push(m);
-                self.bbeg.number = 1;
-                self.bbeg.status = FillStatus::Filled;
-            } else {
-                self.bbeg.level = self.bbeg_fail_budget();
-            };
-            bbeg_attempts += 1;
-        }
-
-        println!("BBEG budget {:?}", self.bbeg.budget);
-        println!("Remaining budget {}\n", self.budget);
 
         self.budget -= self.bbeg.budget;
+        self.hench.weight.get_budget(self.budget);
 
-        self.get_hench_params();
-        if self.hench.number > 0 && self.hench.status != FillStatus::Skipped {
-            let result = query::query(
-                &self.monster_types,
-                &self.hench,
-                self.hench.level.unwrap(),
-                &pool,
-                None,
-            )
-            .await;
-            match result {
-                Ok(m) => {
-                    if let Some(m) = m {
-                        event!(Level::DEBUG, "Hench filled successfully budget {:?}, remaining budget: {}", self.hench.budget, self.budget);
-                        self.hench.status = FillStatus::Filled;
-                        monster_list.push(m);
-                    } else {
-                        self.hench.status = FillStatus::Failed;
-                    }
-                }
-                Err(e) => {
-                    return Err(e);
-                }
-            }
-        } else {
-            self.hench.status = FillStatus::Skipped;
-        }
-
-        let mut hench_attempts = 0;
-        while self.hench.status == FillStatus::Failed
-            && hench_attempts < 3
-            && self.hench.status != FillStatus::Skipped
-        {
-            event!(Level::WARN,
-                "Hench failed for level {}, attempting to fill.",
-                self.hench.level.unwrap()
-            );
-            self.hench.budget = 0.0;
-            self.get_hench_params();
-            if let Some(m) = query::query(
-                &self.monster_types,
-                &self.hench,
-                self.hench.level.unwrap(),
-                &pool,
-                None,
-            )
-            .await?
-            {
-                event!(Level::INFO, "Hehcman filled. budget {:?}, remaining budget: {}", self.hench.budget, self.budget);
-                monster_list.push(m);
+        if self.hench.status == FillStatus::Pending {
+            if let Some(m) = hench_list.unwrap() {
                 self.hench.status = FillStatus::Filled;
-                break;
-            } else if hench_attempts == 2 {
-                self.lackey.budget += self.hench.budget;
-            };
-            if hench_attempts == 2 && self.hench.status == FillStatus::Failed {
-                event!(Level::ERROR, "Hench failed to fill, hench budget: {}", self.hench.budget);
+                monster_list.push(self.select_hench(m, self.level, self.hench.weight.get_budget(self.budget)));
+            } else {
+                self.hench.status = FillStatus::Failed;
             }
-            hench_attempts += 1;
         }
 
         self.budget -= self.hench.budget;
 
-        self.get_lackey_params();
-        if self.lackey.number > 0 && self.lackey.status != FillStatus::Skipped {
-            let result = query::query(
-                &self.monster_types,
-                &self.lackey,
-                self.lackey.level.unwrap(),
-                &pool,
-                None,
-            )
-            .await;
-
-            match result {
-                Ok(m) => {
-                    if let Some(m) = m {
-                        event!(Level::DEBUG, "Lackey budget {:?}, remaining budget: {}", self.lackey.budget, self.budget);
-                        self.lackey.status = FillStatus::Filled;
-                        monster_list.push(m);
-                    } else {
-                        self.lackey.status = FillStatus::Failed;
-                    }
-                }
-                Err(e) => {
-                    return Err(e);
-                }
+        self.lackey.weight.get_budget(self.budget);
+        if self.lackey.status == FillStatus::Pending {
+            if let Some(m) = lackey_list.unwrap() {
+                self.lackey.status = FillStatus::Filled;
+                monster_list.push(self.select_lackey(m, self.level, self.lackey.weight.get_budget(self.budget)));
+            } else {
+                self.lackey.status = FillStatus::Failed;
             }
         }
-
-        if self.lackey.status == FillStatus::Failed {
-            event!(Level::WARN,
-                "Hench failed for level {}, attempting to fill.",
-                self.hench.level.unwrap()
-            );
-            self.get_lackey_params();
-            if let Some(m) = query::query(
-                &self.monster_types,
-                &self.lackey,
-                self.lackey.level.unwrap(),
-                &pool,
-                None,
-            )
-            .await?
-            {
-                event!(Level::DEBUG, "Lackey budget {:?}, remaining budget: {}", self.lackey.budget, self.budget);
-                monster_list.push(m);
-                self.lackey.status = FillStatus::Filled;
-            }
-        };
 
         self.budget -= self.lackey.budget;
 
         Ok(monster_list)
     }
 
-    fn get_bbeg_params(&mut self) {
-        let current_budget = self.budget;
-        self.bbeg.level = match self.monster_weights.bbeg {
-            Weight::Less => {
-                self.bbeg.budget = current_budget * 0.25;
-                self.bbeg_budget()
-            }
-            Weight::Even => {
-                self.bbeg.budget = current_budget * 0.5;
-                self.bbeg_budget()
-            }
-            Weight::More => {
-                self.bbeg.budget = current_budget * 0.75;
-                self.bbeg_budget()
-            }
-            Weight::All => {
-                self.bbeg.budget = current_budget;
-                self.bbeg_budget()
-            }
-            Weight::None => {
-                self.bbeg.status = FillStatus::Skipped;
-                None
-            }
-        };
-    }
+    fn bbeg_budget(&mut self, monsters: Vec<monster::MonsterData>, budget: f32) -> monster::Monster {
 
-    fn get_hench_params(&mut self) {
-        let current_budget = self.budget;
-        let henchman_number = match self.monster_weights.henchman {
-            Weight::Less => {
-                self.hench.budget = current_budget * 0.25;
-                self.henchman_budget()
+        let mut range: Vec<i32> = Vec::new();
+        for monster in monsters.iter() {
+            if !range.contains(&monster.level.unwrap()) {
+                range.push(monster.level.unwrap());
             }
-            Weight::Even => {
-                self.hench.budget = current_budget * 0.5;
-                self.henchman_budget()
-            }
-            Weight::More => {
-                self.hench.budget = current_budget * 0.75;
-                self.henchman_budget()
-            }
-            Weight::All => {
-                self.hench.budget = current_budget;
-                self.henchman_budget()
-            }
-            Weight::None => {
-                self.hench.status = FillStatus::Skipped;
-                0
-            }
-        };
-
-        self.hench.number = henchman_number;
-    }
-
-    fn get_lackey_params(&mut self) {
-        let (lackey_number, lackey_level) =
-            if self.budget >= 10.0 && self.monster_weights.lackey != Weight::None {
-                self.lackey.budget = self.budget;
-                self.lackey_budget()
-            } else {
-                self.lackey.status = FillStatus::Skipped;
-                (0, 0)
-            };
-
-        self.lackey.level = Some(lackey_level);
-
-        self.lackey.number = lackey_number;
-    }
-
-    fn lackey_budget(&mut self) -> (i32, i32) {
-        let lackey_mod: i32;
-        if self.level == 2 {
-            lackey_mod = -3;
-            self.lackey.level = Some(self.level - 3);
-        } else if self.lackey.level.is_none() {
-            let mut rng = rand::thread_rng();
-            lackey_mod = rng.gen_range(-4..=-3);
-        } else if self.lackey.level.unwrap() == self.level - 4 {
-            lackey_mod = -3;
-            self.lackey.level = Some(self.level - 3);
-        } else {
-            lackey_mod = -4;
-            self.lackey.level = Some(self.level - 4);
         }
 
-        let budget = self.lackey.budget;
-        match lackey_mod {
-            -4 => {
-                self.lackey.budget = budget - (budget % 10.0);
-                ((self.lackey.budget / 10.0).round() as i32, self.level - 4)
-            }
-            -3 => {
-                self.lackey.budget = budget - (budget % 15.0);
-                ((self.lackey.budget / 15.0).round() as i32, self.level - 3)
-            }
-            _ => panic!("invalid random range"),
-        }
-    }
-
-    fn henchman_budget(&mut self) -> i32 {
-        let hench_mod: i32;
-        let mut rng = rand::thread_rng();
-        if self.hench.level.is_none() && self.hench.budget >= 40.0 {
-            hench_mod = rng.gen_range(-2..=0);
-        } else if self.hench.level.is_none() && self.hench.budget >= 30.0 {
-            hench_mod = rng.gen_range(-1..=0);
-        } else if self.hench.level.is_none() && self.hench.budget >= 20.0 {
-            hench_mod = -2;
-        } else if self.hench.level.is_none() {
-            self.hench.status = FillStatus::Skipped;
-            self.monster_weights.lackey = Weight::All;
-            self.budget += self.hench.budget;
-            return 0;
-        } else if self.hench.level.unwrap() == self.level {
-            hench_mod = -1;
-            self.hench.level = Some(self.level - 1);
-        } else if self.hench.level.unwrap() == self.level - 1 {
-            self.hench.level = Some(self.level - 2);
-            hench_mod = -2;
-        } else {
-            self.hench.level = Some(self.level);
-            hench_mod = 0;
-        }
-
-        let budget = self.hench.budget;
-        match hench_mod {
-            -2 => {
-                self.hench.level = Some(self.level - 2);
-                self.hench.budget = budget - (budget % 20.0);
-                (self.hench.budget / 20.0).round() as i32
-            }
-            -1 => {
-                self.hench.level = Some(self.level - 1);
-                self.hench.budget = budget - (budget % 30.0);
-                (self.hench.budget / 30.0).round() as i32
-            }
-            0 => {
-                self.hench.level = Some(self.level);
-                self.hench.budget = budget - (budget % 40.0);
-                (self.hench.budget / 40.0).round() as i32
-            }
-            _ => panic!("invalid random range"),
-        }
-    }
-
-    fn bbeg_budget(&mut self) -> Option<i32> {
-        match self.bbeg.budget {
-            b if b >= 160.0 => {
+        let level = self.level;
+        match budget {
+            b if b >= 160.0 && range.contains(&(level + 4)) => {
                 self.bbeg.budget = 160.0;
-                Some(self.level + 4)
+                self.bbeg.level = Some(self.level + 4);
             }
-            b if b >= 120.0 => {
+            b if b >= 120.0 && range.contains(&(level + 3))=> {
                 self.bbeg.budget = 120.0;
-                Some(self.level + 3)
+                self.bbeg.level = Some(self.level + 3);
             }
-            b if b >= 80.0 => {
+            b if b >= 80.0 && range.contains(&(level + 2)) => {
                 self.bbeg.budget = 80.0;
-                Some(self.level + 2)
+                self.bbeg.level = Some(self.level + 2);
             }
-            b if b >= 60.0 => {
+            b if b >= 60.0 && range.contains(&(level + 1)) => {
                 self.bbeg.budget = 60.0;
-                Some(self.level + 1)
+                self.bbeg.level = Some(self.level + 1);
             }
-            b if b >= 40.0 => {
+            b if b >= 40.0 && range.contains(&level) => {
                 self.bbeg.budget = 40.0;
-                Some(self.level)
+                self.bbeg.level = Some(self.level);
             }
-            b if b >= 30.0 => {
+            b if b >= 30.0 && range.contains(&(level - 1)) => {
                 self.bbeg.budget = 30.0;
-                Some(self.level - 1)
+                self.bbeg.level = Some(self.level - 1);
             }
-            b if b >= 20.0 => {
+            b if b >= 20.0 && range.contains(&(level - 2)) => {
                 self.bbeg.budget = 20.0;
-                Some(self.level - 2)
+                self.bbeg.level = Some(self.level - 2);
             }
-            b if b >= 15.0 => {
+            b if b >= 15.0 && range.contains(&(level - 3)) => {
                 self.bbeg.budget = 15.0;
-                Some(self.level - 3)
+                self.bbeg.level = Some(self.level - 3);
             }
-            b if b >= 10.0 => {
+            b if b >= 10.0 && range.contains(&(level -4)) => {
                 self.bbeg.budget = 10.0;
-                Some(self.level - 4)
+                self.bbeg.level = Some(self.level - 4);
             }
-            _ => None,
+            _ => panic!("Bbeg level out of range"),
         }
+
+        let mut candidates: Vec<monster::MonsterData> = Vec::new();
+        
+        for monster in monsters {
+            if monster.level.unwrap() == self.bbeg.level.unwrap() {
+                candidates.push(monster);
+            }
+        }
+
+        let mut rng = rand::thread_rng();
+
+        let index = if candidates.len() > 1 {
+           rng.gen_range(0..candidates.len()) 
+        } else {
+            0
+        };
+    
+        monster::Monster::new(
+            candidates.remove(index),
+            vec![String::from("Undead")],
+            1
+        ).unwrap()
+
     }
 
-    fn bbeg_fail_budget(&mut self) -> Option<i32> {
-        println!("bbeg level {}", self.bbeg.level.unwrap());
-        println!("party level: {}", self.level);
-        match self.bbeg.level.unwrap() {
-            l if l == self.level + 4 => {
-                self.bbeg.budget -= 40.0;
-                Some(self.level + 3)
-            }
-            l if l == self.level + 3 => {
-                self.bbeg.budget -= 40.0;
-                Some(self.level + 2)
-            }
-            l if l == self.level + 2 => {
-                self.bbeg.budget -= 20.0;
-                Some(self.level + 1)
-            }
-            l if l == self.level + 1 => {
-                self.bbeg.budget -= 20.0;
-                Some(self.level)
-            }
-            l if l == self.level => {
-                self.bbeg.budget -= 10.0;
-                Some(self.level - 1)
-            }
-            l if l == self.level - 1 => {
-                self.bbeg.budget -= 10.0;
-                Some(self.level - 2)
-            }
-            l if l == self.level - 2 => {
-                self.bbeg.budget -= 10.0;
-                Some(self.level - 3)
-            }
-            l if l == self.level - 3 => {
-                self.bbeg.budget -= 5.0;
-                Some(self.level - 4)
-            }
-            l if l == self.level - 4 => Some(self.level - 4),
-            _ => None,
+    fn select_lackey(&mut self,
+                 mut list: Vec<monster::MonsterData>,
+                 level: i32, budget: f32) -> monster::Monster {
+    let mut rng = rand::thread_rng();
+
+    let index = rng.gen_range(0..list.len());
+    
+    let lackey = list.remove(index);
+
+    println!("Budget: {}", budget);
+    let number = match lackey.level.unwrap() {
+        l if l == level -4 => {
+            self.lackey.budget = budget - (budget % 10.0);
+            (self.lackey.budget / 10.0).round() as i32
         }
+        l if l == level -3 => {
+            self.lackey.budget = budget - (budget % 15.0);
+            (self.lackey.budget / 15.0).round() as i32
+        }
+        _ => panic!("invalid random range"),
+    };
+
+    event!(Level::INFO, number);
+    monster::Monster::new(lackey, vec![String::from("Undead")], number).unwrap()
+}
+
+fn select_hench(&mut self,
+                 mut list: Vec<monster::MonsterData>,
+                 level: i32, budget: f32) -> monster::Monster {
+
+    let mut rng = rand::thread_rng();
+
+    let index = rng.gen_range(0..list.len());
+    
+    let hench = list.remove(index);
+
+    println!("Budget: {}", budget);
+
+    let number = match hench.level.unwrap() {
+        l if l == level - 2 => {
+            self.hench.budget = budget - (budget % 20.0);
+            (self.hench.budget / 20.0).round() as i32
+        }
+        l if l == level - 1 => {
+            self.hench.budget = budget - (budget % 30.0);
+            (self.hench.budget/ 30.0).round() as i32
+        }
+        l if l == level => {
+            self.hench.budget = budget - (budget % 40.0);
+            (self.hench.budget / 40.0).round() as i32
+        }
+        _ => panic!("invalid random range"),
+    };
+
+    event!(Level::INFO, number);
+
+    monster::Monster::new(hench, vec![String::from("Undead")], number).unwrap()
+}
+}
+
+
+
+fn bbeg_range(level: i32) -> (i32, i32) {
+    let upper = level + 4;
+    let mut lower = level - 4;
+    if lower < -1 {
+       lower = -1; 
     }
+    (upper, lower)
+}
+
+fn hench_range(level: i32) -> (i32, i32) {
+    let upper = level;
+    let lower =  level - 2;
+    (upper, lower)
+}
+
+fn lackey_range(level: i32) -> (i32, i32) {
+    let mut upper = level - 3;
+    let mut lower = level - 4;
+    if upper < -1{
+        upper = -1;
+    }
+
+    if lower < -1 {
+        lower = -1;
+    }
+    (upper, lower)
 }
 
 fn adjust_budget(party_size: i32) -> f32 {
@@ -491,7 +318,6 @@ fn adjust_budget(party_size: i32) -> f32 {
         _ => panic!("Party size out of range {}", party_size),
     }
 }
-
 
 impl fmt::Display for MonsterWeights {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

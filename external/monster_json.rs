@@ -2,10 +2,11 @@ use actix_web::{
     body::BoxBody, http::header::ContentType, HttpRequest, HttpResponse, Responder
 };
 use tracing::{event, Level};
+use rand::Rng;
 use serde::Serialize;
 use sqlx::postgres::PgPoolOptions;
-use crate::types::monster_params;
-use crate::types::state::EitherBool;
+use crate::types::{monster_params, monster};
+use crate::types::state::{EitherBool, Weight};
 use crate::handlers::query;
 use crate::monster_api;
 
@@ -50,6 +51,7 @@ impl MonsterJson {
             EitherBool::new(is_ranged).unwrap(),
             EitherBool::new(is_caster).unwrap(),
             is_aquatic,
+            Weight::All
         );
 
         let monster_budget = if query_params.bbeg {
@@ -75,16 +77,32 @@ impl MonsterJson {
             .split(',')
             .map(|v| v.to_string())
             .collect();
-        let monster = query::query(&monster_types, &monster_group,  monster_budget.level, &pool, Some(&query_params.name)).await;
+        let monster = query::query(&monster_types,
+                                   &monster_group,
+                                   monster_budget.level,
+                                   monster_budget.level,
+                                   &pool,
+                                   Some(&query_params.name)).await;
 
         let monster = match monster {
             Ok(m) => m,
             Err(_) => panic!("Couldn't retrieve monsters {:?}", query_params),
         };
 
-        if let Some(m) = monster {
-            event!(Level::INFO, m.name, monster_budget.number, monster_budget.level, status="Filled");
-            MonsterJson {
+        
+        let mut monster = monster.unwrap();
+        let mut rng = rand::thread_rng();
+
+        let index = rng.gen_range(0..monster.len());
+        let m = monster::Monster::new(
+                monster.remove(index),
+                vec![String::from("Undead")],
+                1
+                ).unwrap();
+
+        event!(Level::INFO, m.name, monster_budget.number, monster_budget.level, status="Filled");
+
+        MonsterJson {
                 budget: monster_budget.budget,
                 url: m.url,
                 name: m.name,
@@ -97,22 +115,21 @@ impl MonsterJson {
                 is_ranged: m.is_ranged,
                 status: String::from("Filled"),
             }
-        } else {
-            event!(Level::WARN, status="Failed to find monster");
-            MonsterJson {
-                budget: 10,
-                url: String::from(""),
-                name: String::from("Failed To find Monster"),
-                number: 0,
-                level: 0,
-                alignment: String::from(""),
-                monster_type: String::from(""),
-                aquatic: false,
-                is_caster: false,
-                is_ranged: false,
-                status: String::from("Failed"),
-            }
-        }
+        // } else {
+        //     event!(Level::WARN, status="Failed to find monster");
+        //     MonsterJson {
+        //         budget: 10,
+        //         url: String::from(""),
+        //         name: String::from("Failed To find Monster"),
+        //         number: 0,
+        //         level: 0,
+        //         alignment: String::from(""),
+        //         monster_type: String::from(""),
+        //         aquatic: false,
+        //         is_caster: false,
+        //         is_ranged: false,
+        //         status: String::from("Failed"),
+        //     }
     }
 }
 

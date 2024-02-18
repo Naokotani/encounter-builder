@@ -50,6 +50,26 @@ impl Weight {
         };
         Ok(config_weight)
     }
+
+    pub fn get_budget(&self, budget: f32) -> f32 {
+        match self {
+        Weight::Less => {
+            budget * 0.25
+        }
+        Weight::Even => {
+            budget * 0.5
+        }
+        Weight::More => {
+            budget * 0.75
+        }
+        Weight::All => {
+            budget
+        }
+        Weight::None => {
+            0.0
+        }
+        }
+    }
 }
 
 #[derive(Debug)]

@@ -77,7 +77,6 @@ impl EncounterJson {
     ) -> Result<Self, Box<dyn std::error::Error>> {
         let data = get_data(query_params).await;
         let (monsters, encounter) = data?;
-        println!("{:?}", monsters);
 
         let lackey_level = encounter.lackey.level.unwrap_or(encounter.level - 3);
         let (lackey, monsters) = get_monster(&encounter.lackey.status, lackey_level, monsters)?;
@@ -105,7 +104,7 @@ impl EncounterJson {
             bbeg_budget: encounter.bbeg.budget,
             bbeg_url: bbeg.url,
             bbeg_name: bbeg.name,
-            bbeg_number: encounter.bbeg.number,
+            bbeg_number: bbeg.number,
             bbeg_level: encounter.bbeg.level.unwrap_or(0),
             bbeg_alignment: bbeg.alignment,
             bbeg_monster_type: bbeg.monster_type,
@@ -170,19 +169,19 @@ async fn get_data(
         query_params.party_size,
         difficulty,
         monster_types,
-        monster_weights,
     );
 
     let bbeg_params =
-        monster_params::MonsterParams::new(bbeg_caster, bbeg_ranged, query_params.bbeg_aquatic);
+        monster_params::MonsterParams::new( bbeg_caster, bbeg_ranged, query_params.bbeg_aquatic, monster_weights.bbeg);
 
     let hench_params =
-        monster_params::MonsterParams::new(hench_caster, hench_ranged, query_params.hench_aquatic);
+        monster_params::MonsterParams::new(hench_caster, hench_ranged, query_params.hench_aquatic, monster_weights.henchman);
 
     let lackey_params = monster_params::MonsterParams::new(
         lackey_caster,
         lackey_ranged,
         query_params.lackey_aquatic,
+        monster_weights.lackey
     );
 
     let mut encounter =
@@ -261,9 +260,9 @@ mod tests {
                 .expect("no result from encounter json new");
             event!(Level::INFO, res.budget);
 
+            assert!(res.bbeg_number > 0);
             assert!(matches!(res.bbeg_level, l if l <= i + 4 && l >= i - 4));
             assert_eq!(res.bbeg_status, "Filled");
-
         }
     }
 
@@ -304,6 +303,8 @@ mod tests {
 
             assert!(matches!(res.hench_level, l if l <= i && l >= i - 2));
             assert!((0.0..=20.0).contains(&res.budget));
+            assert!(res.hench_number > 0);
+            assert_eq!(res.hench_status, "Filled");
         }
     }
 
@@ -342,8 +343,10 @@ mod tests {
                 .await
                 .expect("no result from encounter json new");
 
+            assert!(res.lackey_number > 0);
             assert!(matches!(res.lackey_level, l if l == i -3 || l == i - 4));
             assert!((0.0..=10.0).contains(&res.budget));
+            assert_eq!(res.lackey_status, "Filled");
         }
     }
 }
