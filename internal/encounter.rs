@@ -70,7 +70,6 @@ impl Encounter {
         };
 
         event!(Level::INFO, self.level);
-        println!("Level {}", self.level);
 
         let (bbeg_upper_level, bbeg_lower_level) = bbeg_range(self.level);
         let (hench_upper_level, hench_lower_level) = hench_range(self.level);
@@ -234,9 +233,6 @@ impl Encounter {
         level: i32,
         budget: f32,
     ) -> monster::Monster {
-        println!("{}", level);
-        println!("{}", level - 3);
-        println!("{}", level - 4);
         let mut list = if budget < 15.0 {
             filter_list(list, level - 4)
         } else {
@@ -246,7 +242,6 @@ impl Encounter {
         let index = rng.gen_range(0..list.len());
         let lackey = list.remove(index);
 
-        println!("{:?}", lackey);
         let number = match lackey.level.unwrap() {
             l if l == level - 4 => {
                 self.lackey.budget = budget - (budget % 10.0);
