@@ -222,9 +222,10 @@ fn get_monster(
 
 #[cfg(test)]
 mod tests {
+    use test_log;
     use super::*;
 
-    #[tokio::test]
+    #[test_log::test(tokio::test)]
     async fn bbeg_solo() {
         let difficulties: [&str; 5] = ["trivial", "low", "moderate", "severe", "extreme"];
         for diff in difficulties.into_iter() {
@@ -266,7 +267,7 @@ mod tests {
         }
     }
 
-    #[tokio::test]
+    #[test_log::test(tokio::test)]
     async fn hench_solo() {
         let difficulties: [&str; 5] = ["trivial", "low", "moderate", "severe", "extreme"];
         for diff in difficulties.into_iter() {
@@ -308,7 +309,7 @@ mod tests {
         }
     }
 
-    #[tokio::test]
+    #[test_log::test(tokio::test)]
     async fn lackey_solo() {
         let difficulties: [&str; 5] = ["trivial", "low", "moderate", "severe", "extreme"];
         for diff in difficulties.into_iter() {
@@ -347,6 +348,97 @@ mod tests {
             assert!(matches!(res.lackey_level, l if l == i -3 || l == i - 4));
             assert!((0.0..=10.0).contains(&res.budget));
             assert_eq!(res.lackey_status, "Filled");
+        }
+    }
+
+    #[test_log::test(tokio::test)]
+    async fn group() {
+        let difficulties: [&str; 2] = ["severe", "extreme"];
+        for diff in difficulties.into_iter() {
+            group_levels(diff).await;
+        }
+    }
+    async fn group_levels(diff: &str) {
+        event!(Level::INFO, diff);
+        for i in 5..20 {
+            event!(Level::INFO, group="Henchman", i, diff);
+            let query = encounter_api::QueryParams {
+                level: i,
+                party_size: 4,
+                difficulty: String::from(diff),
+                monster_types: String::from("Animal"),
+                bbeg_budget: String::from("even"),
+                bbeg_caster: String::from("either"),
+                bbeg_ranged: String::from("either"),
+                bbeg_aquatic: false,
+                hench_budget: String::from("even"),
+                hench_caster: String::from("either"),
+                hench_ranged: String::from("either"),
+                hench_aquatic: false,
+                lackey_budget: String::from("all"),
+                lackey_caster: String::from("either"),
+                lackey_ranged: String::from("either"),
+                lackey_aquatic: false,
+            };
+
+            let res = EncounterJson::new(query)
+                .await
+                .expect("no result from encounter json new");
+
+            assert!(res.lackey_number > 0);
+            assert!(res.hench_number > 0);
+            assert!(res.bbeg_number == 1);
+            assert!(matches!(res.bbeg_level, l if l <= i + 4 && l >= i - 4));
+            assert!(matches!(res.hench_level, l if l <= i && l >= i - 2));
+            assert!(matches!(res.lackey_level, l if l == i -3 || l == i - 4));
+            assert_eq!(res.bbeg_status, "Filled");
+            assert_eq!(res.hench_status, "Filled");
+            assert_eq!(res.lackey_status, "Filled");
+            assert!(res.budget < 20.0);
+        }
+    }
+
+    #[test_log::test(tokio::test)]
+    async fn no_hench_test_group() {
+    let difficulties: [&str; 5] = ["trivial", "low", "moderate", "severe", "extreme"];
+        for diff in difficulties.into_iter() {
+            no_hench_group_levels(diff).await;
+        }
+    }
+    async fn no_hench_group_levels(diff: &str) {
+        event!(Level::INFO, diff);
+        for i in 5..20 {
+            event!(Level::INFO, group="Henchman", i, diff);
+            let query = encounter_api::QueryParams {
+                level: i,
+                party_size: 4,
+                difficulty: String::from(diff),
+                monster_types: String::from("Animal"),
+                bbeg_budget: String::from("even"),
+                bbeg_caster: String::from("either"),
+                bbeg_ranged: String::from("either"),
+                bbeg_aquatic: false,
+                hench_budget: String::from("even"),
+                hench_caster: String::from("either"),
+                hench_ranged: String::from("either"),
+                hench_aquatic: false,
+                lackey_budget: String::from("all"),
+                lackey_caster: String::from("either"),
+                lackey_ranged: String::from("either"),
+                lackey_aquatic: false,
+            };
+
+            let res = EncounterJson::new(query)
+                .await
+                .expect("no result from encounter json new");
+
+            assert!(res.lackey_number > 0);
+            assert!(res.bbeg_number == 1);
+            assert!(matches!(res.bbeg_level, l if l <= i + 4 && l >= i - 4));
+            assert!(matches!(res.lackey_level, l if l == i -3 || l == i - 4));
+            assert_eq!(res.bbeg_status, "Filled");
+            assert_eq!(res.lackey_status, "Filled");
+            assert!(res.budget < 20.0);
         }
     }
 }

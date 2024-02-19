@@ -119,3 +119,26 @@ impl FillStatus {
         }
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use test_log;
+    use super::*;
+
+    #[test_log::test]
+    pub fn weight() {
+        let less = Weight::Less.get_budget(100.0);
+        let even = Weight::Even.get_budget(100.0);
+        let more = Weight::More.get_budget(100.0);
+        let all = Weight::All.get_budget(100.0);
+        let none = Weight::None.get_budget(100.0);
+
+        assert_eq!(less, 25.0);
+        assert_eq!(even, 50.0);
+        assert_eq!(more, 75.0);
+        assert_eq!(all, 100.0);
+        assert_eq!(none, 0.0);
+    }
+}
+    

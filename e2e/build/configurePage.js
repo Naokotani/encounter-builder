@@ -17,6 +17,7 @@ export default (level) => __awaiter(void 0, void 0, void 0, function* () {
     const page = yield browser.newPage();
     yield page.goto(`${CLIENT_URL}encounter-builder/`);
     yield page.setViewport({ width: 1920, height: 1080 });
+    yield page.waitForNetworkIdle();
     yield page.select('#party-level', level.toString());
     return {
         page: page,

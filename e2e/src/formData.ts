@@ -27,6 +27,5 @@ export default async (page: Page, url: string) => {
 		return (await response.text()).startsWith('{"id"');
 	});
 
-	await page.waitForNetworkIdle({idleTime: 500});
 	return data;
 }
